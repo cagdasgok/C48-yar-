@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>C48 Studios — Street Rush v0.6.2 TEST BUILD</title>
+<style>
+:root{--bg:#090d14;--panel:#111a27;--line:#25354a;--red:#ff3b4e;--gold:#ffc857;--text:#edf4ff;--muted:#91a3b9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17243a,#090d14 65%);color:var(--text);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line);background:#080c13e8;position:sticky;top:0;z-index:4}
+.brand{font-weight:900;letter-spacing:1.5px;font-size:19px}.brand span{color:var(--red)}.wallet{font-weight:800;color:var(--gold);font-size:17px}
+main{max-width:1680px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,2fr) minmax(300px,.85fr);gap:16px}
+.panel{background:linear-gradient(150deg,#141f2e,#0e1520);border:1px solid var(--line);border-radius:15px;padding:16px;box-shadow:0 12px 35px #0003}
+h1,h2,h3,p{margin-top:0}h1{font-size:clamp(24px,3vw,36px);margin-bottom:4px}h2{font-size:18px;margin-bottom:12px}h3{font-size:15px;margin-bottom:6px}.sub{color:var(--muted);margin-bottom:14px}.red{color:var(--red)}.gold{color:var(--gold)}
+canvas{width:100%;display:block;border-radius:12px;border:1px solid #33465b;background:#17202a;aspect-ratio:16/9;height:auto;max-height:none;box-shadow:0 10px 32px #0005}
+#gameShell{position:relative}#gameShell:fullscreen{background:#070b12;padding:14px;display:flex;flex-direction:column;justify-content:center;overflow:auto}#gameShell:fullscreen canvas{width:100%;max-height:calc(100vh - 190px);object-fit:contain}#gameShell:fullscreen .game-title{display:none}#gameShell:fullscreen .mode-picker{grid-template-columns:repeat(4,minmax(0,1fr)}#gameShell:fullscreen .hud{font-size:clamp(12px,1.2vw,18px)}
+.game-tools{display:flex;justify-content:flex-end;margin:0 0 8px;gap:8px}.game-tools button{font-size:13px}
+.hud{display:flex;justify-content:space-between;gap:8px;margin:10px 0;color:#c5d4e6;font-size:13px;flex-wrap:wrap}.meter-wrap{display:flex;align-items:center;gap:7px}.meter{display:inline-block;width:85px;height:9px;background:#1a2c40;border:1px solid #36516d;border-radius:9px;overflow:hidden;vertical-align:middle}.meter i{display:block;width:100%;height:100%;background:linear-gradient(90deg,#168bff,#51d5ff);box-shadow:0 0 8px #2caaff;transition:width .12s}
+.color-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}.color-grid button{display:flex;align-items:center;gap:8px;text-align:left;font-size:12px;padding:8px}.color-grid i{width:20px;height:20px;display:inline-block;border-radius:50%;border:1px solid #ffffff55;flex-shrink:0}.color-grid .rainbow{background:linear-gradient(135deg,red,orange,yellow,green,blue,violet)}.color-grid .split.redblack{background:linear-gradient(135deg,#e52e43 50%,#111318 50%)}.color-grid .split.purplepink{background:linear-gradient(135deg,#9b59ff 50%,#ff79c6 50%)}
+button{font:inherit;font-weight:750;color:var(--text);background:#202e40;border:1px solid #34475e;border-radius:9px;padding:10px 12px;cursor:pointer;transition:.15s}
+button:hover{filter:brightness(1.2);transform:translateY(-1px)}button:disabled{opacity:.4;cursor:not-allowed;transform:none}.primary{background:linear-gradient(120deg,#ff3349,#c91e38);border-color:#ff5a6a}.goldbtn{background:#5b4519;border-color:#8a6b2b}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}.tabs button.active{background:#53202c;border-color:#ff4558}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.stat{padding:10px;border:1px solid var(--line);background:#0b121c;border-radius:10px}.stat small{display:block;color:var(--muted);font-size:11px}.stat b{font-size:18px}.carlist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.carcard{border:1px solid var(--line);border-radius:10px;padding:10px;background:#0b121c}.carcard.selected{border-color:var(--red);box-shadow:inset 0 0 0 1px #ff3b4e55}.car-art{height:50px;display:flex;align-items:center;justify-content:center;font-size:30px;border-radius:7px;background:linear-gradient(120deg,#172536,#0c121b);margin-bottom:8px}
+.garage-hero{position:relative;overflow:hidden;border:1px solid #344b65;border-radius:13px;padding:14px;background:radial-gradient(ellipse at 50% 25%,#293e55 0%,#101a28 68%);margin-bottom:12px}.garage-hero:before{content:"";position:absolute;left:-10%;right:-10%;bottom:20px;height:2px;background:linear-gradient(90deg,transparent,#ff3b4e88,#48dfff88,transparent);box-shadow:0 0 18px #48dfff33}.garage-car-icon{height:92px;display:flex;align-items:center;justify-content:center;font-size:64px;filter:drop-shadow(0 10px 8px #0009);position:relative}.garage-car-title{font-size:19px;font-weight:900;margin-top:3px}.garage-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}.garage-badge{font-size:11px;padding:4px 7px;border-radius:20px;background:#203247;border:1px solid #3a536c;color:#cfe3f8}.garage-badge.installed{background:#173d35;border-color:#267e66;color:#8ff0c6}.muted{color:var(--muted)}
+.item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid #263346}.item:last-child{border:0}.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#18283a;border:1px solid #49627e;padding:12px 18px;border-radius:10px;z-index:10;box-shadow:0 10px 30px #0008;max-width:90%;text-align:center}.hidden{display:none!important}.progress{height:8px;border-radius:9px;background:#26364a;overflow:hidden;margin-top:6px}.progress span{display:block;height:100%;background:linear-gradient(90deg,#ff3b4e,#ffc857)}
+.mode-picker{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}.mode-card{text-align:left;background:#0b1420;padding:10px}.mode-card b,.mode-card small{display:block}.mode-card small{color:#91a3b9;font-size:11px;margin-top:4px}.mode-card.active{border-color:#ff3b4e;background:#351b28}.mode-card:disabled{opacity:.55}.controls{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}.keys{font-size:12px;color:var(--muted)}.touch{display:none;gap:8px}.touch button{min-width:48px;font-size:20px;padding:12px}
+footer{text-align:center;color:#65788f;font-size:12px;padding:10px 20px 22px}
+@media(max-width:850px){main{grid-template-columns:1fr;padding:10px}.mode-picker{grid-template-columns:1fr 1fr}header{padding:12px}.carlist{grid-template-columns:repeat(2,minmax(0,1fr))}.touch{display:flex}.keys{display:none}}
+</style>
+</head>
+<body>
+<header><div class="brand"><span>C48</span> STUDIOS <span style="color:#91a3b9">/ STREET RUSH v0.6.2</span></div><div class="wallet">₺ <span id="money">12.000</span></div></header>
+<main>
+<section class="panel" id="gameShell">
+<h1 class="game-title">STREET <span class="red">RUSH</span></h1><p class="sub game-title">Sıfırdan başla. Yarış kazan. Garajını efsaneye dönüştür.</p>
+<div class="game-tools"><button id="fullscreenBtn" type="button">⛶ Yarış Alanını Büyüt</button></div>
+<canvas id="game" width="960" height="540" aria-label="2D sokak yarışı oyunu"></canvas>
+<div class="hud"><span id="raceState">GARAJDA BEKLİYOR</span><span>HIZ <b id="speed">0</b> km/sa</span><span>MESAFE <b id="distance">0</b> m</span><span>CAN <b id="health">100</b>%</span><span class="meter-wrap">TURBO <span class="meter"><i id="nitroBar"></i></span> <b id="nitroHud">100</b>%</span></div>
+<div class="mode-picker" id="modePicker">
+<button class="mode-card active" data-mode="morning"><b>☀️ Sabah Yarışı</b><small>1.600 m · Ücretsiz</small></button>
+<button class="mode-card" data-mode="night"><b>🌙 Gece Otobanı</b><small>2.500 m · Açılış ₺30.000</small></button>
+<button class="mode-card" data-mode="street"><b>🏙️ Sokak Yarışı</b><small>2.800 m · Açılış ₺55.000</small></button>
+<button class="mode-card" data-mode="cargo"><b>🚨 Paket Atma</b><small>3.000 m · 1 dakikada bir</small></button>
+</div>
+<div class="controls"><div class="keys">Kontrol: <b>W / ↑</b> gaz · <b>S / ↓</b> fren · <b>A D / ← →</b> şerit değiştir · <b>SPACE</b> nitro</div><div class="touch"><button data-key="left">◀</button><button data-key="gas">▲</button><button data-key="brake">▼</button><button data-key="right">▶</button><button data-key="nitro" class="goldbtn">⚡</button></div></div>
+<div class="row" style="margin-top:13px"><button class="primary" id="startRace">🏁 Yarışa Başla</button><button id="restartRace" class="hidden">↻ Tekrar Dene</button><button id="claim" class="hidden goldbtn">Ödülü Al</button></div>
+<p class="muted" style="font-size:12px;margin:10px 0 0">İlk yarış ücretsiz. Trafiğe dikkat et; bitiş çizgisine ulaş ve ödül kazan!</p>
+</section>
+<aside class="panel">
+<div class="tabs"><button class="active" data-tab="garage">🚘 Garaj</button><button data-tab="market">🛒 Galeri</button><button data-tab="tuning">🔧 Modifiye</button><button data-tab="career">🏆 Kariyer</button></div>
+<section id="tab-garage"><h2>Garajın</h2><div id="activeCar"></div><div class="stats"><div class="stat"><small>GÜÇ</small><b id="power">120</b><small>HP</small></div><div class="stat"><small>SON HIZ</small><b id="topSpeed">180</b><small>km/sa</small></div><div class="stat"><small>NİTRO</small><b id="nitroStat">100</b><small>%</small></div></div><h3>Arabaların</h3><div class="carlist" id="ownedCars"></div></section>
+<section id="tab-market" class="hidden"><h2>İkinci El Galeri</h2><p class="muted">Yeni bir araç al, garajını büyüt. Her araç farklı sürüş karakterine sahip.</p><div id="marketCars"></div><div class="item"><div><b>Seçili arabayı sat</b><p>Aracın değerinin %70'ini alırsın. Son arabanı satamazsın.</p></div><button id="sellCar">Sat</button></div></section>
+<section id="tab-tuning" class="hidden"><h2>Atölye & Modifiye</h2><p class="muted">Yükseltmeler sadece seçili arabaya uygulanır.</p><div id="upgrades"></div><h3 style="margin-top:14px">🛠️ Görsel Modifiye</h3><p class="muted">Parçalar seçili arabaya uygulanır ve kayıtlı kalır.</p><div id="parts"></div><h3 style="margin-top:14px">🎨 Renk Atölyesi</h3><div class="color-grid">
+<button data-paint="#318cff" data-cost="500"><i style="background:#318cff"></i>Mavi · ₺500</button><button data-paint="#ffd43b" data-cost="500"><i style="background:#ffd43b"></i>Sarı · ₺500</button><button data-paint="#ff79c6" data-cost="500"><i style="background:#ff79c6"></i>Pembe · ₺500</button><button data-paint="#39c96b" data-cost="500"><i style="background:#39c96b"></i>Yeşil · ₺500</button>
+<button data-paint="#111318" data-cost="1000"><i style="background:#111318"></i>Siyah · ₺1.000</button><button data-paint="#e52e43" data-cost="1000"><i style="background:#e52e43"></i>Kırmızı · ₺1.000</button><button data-paint="#9b59ff" data-cost="1000"><i style="background:#9b59ff"></i>Mor · ₺1.000</button><button data-paint="#ff8a27" data-cost="1000"><i style="background:#ff8a27"></i>Turuncu · ₺1.000</button>
+<button data-paint="rainbow" data-cost="2500"><i class="rainbow"></i>Rengârenk · ₺2.500</button><button data-paint="redblack" data-cost="5000"><i class="split redblack"></i>Kırmızı-siyah · ₺5.000</button><button data-paint="purplepink" data-cost="5000"><i class="split purplepink"></i>Mor-pembe · ₺5.000</button></div></section>
+<section id="tab-career" class="hidden"><h2>Kariyer Panosu</h2><div class="stats"><div class="stat"><small>YARIŞ</small><b id="races">0</b></div><div class="stat"><small>ZAFER</small><b id="wins">0</b></div><div class="stat"><small>SEVİYE</small><b id="level">1</b></div></div><div class="item"><div><b>☀️ Sabah Yarışı</b><p>1.600 m · Tamamlama ₺3.500, hasarsız +₺1.000</p></div><span class="gold">Açık</span></div><div class="item"><div><b>🌙 Gece Otobanı</b><p>2.500 m · 3 rakip · 5 şerit · Açılış ₺30.000</p></div><span class="muted">₺30K</span></div><div class="item"><div><b>🏙️ Sokak Yarışı</b><p>2.800 m · 5 rakip · 2 şerit · Açılış ₺55.000</p></div><span class="muted">₺55K</span></div><div class="item"><div><b>🚨 Paket Atma</b><p>3.000 m · Polis takibi · ₺30.000 + hasarsız ₺6.000</p></div><span class="muted">60 sn bekleme</span></div></section>
+</aside></main>
+<footer>C48 Studios © — Street Rush v0.6.2 · Başlangıç bakiyesi ₺15.000 · İlerleme bu tarayıcıda kaydedilir.</footer>
+<div id="toast" class="toast hidden"></div><script>
+(()=>{
+const $=id=>document.getElementById(id);
+const carDefs=[
+{id:'tofas',name:'Tofaş',emoji:'🚗',price:0,hp:90,top:120,handling:1.08,color:'#f0f0f0',desc:'Klasik başlangıç aracı'},
+{id:'clio',name:'Renault Clio',emoji:'🚙',price:5000,hp:105,top:135,handling:1.16,color:'#e53d4f',desc:'Hafif ve çevik şehir arabası'},
+{id:'doblo',name:'Fiat Doblo',emoji:'🚐',price:9500,hp:125,top:155,handling:.88,color:'#e5e5e5',desc:'Geniş gövde, sağlam sürüş'},
+{id:'passat',name:'Volkswagen Passat',emoji:'🚘',price:14000,hp:145,top:167,handling:1.0,color:'#202833',desc:'Konforlu ve dengeli sedan'},
+{id:'leon',name:'Seat Leon',emoji:'🚗',price:19000,hp:165,top:184,handling:1.12,color:'#d82e35',desc:'Sportif hatchback karakteri'},
+{id:'civic',name:'Honda Civic',emoji:'🚘',price:26000,hp:180,top:196,handling:1.18,color:'#4f86ff',desc:'Sportif ve atik'},
+{id:'c200',name:'Mercedes C200',emoji:'🚙',price:35000,hp:195,top:209,handling:1.08,color:'#aeb8c5',desc:'Premium sedan gücü'},
+{id:'rs3',name:'Audi RS3',emoji:'🏎️',price:39000,hp:210,top:213,handling:1.22,color:'#39a5ff',desc:'Kompakt performans canavarı'},
+{id:'m3',name:'BMW M3',emoji:'🏎️',price:52000,hp:225,top:221,handling:1.2,color:'#2b6adf',desc:'Keskin virajlar için üretildi'},
+{id:'golf',name:'Volkswagen Golf',emoji:'🚗',price:63000,hp:230,top:226,handling:1.19,color:'#45a16b',desc:'Güçlü ve çok yönlü'},
+{id:'rs6',name:'Audi RS6',emoji:'🚘',price:86000,hp:250,top:235,handling:1.16,color:'#777f8d',desc:'Güçlü performans station wagon'},
+{id:'m6',name:'BMW M6',emoji:'🏎️',price:94000,hp:265,top:239,handling:1.13,color:'#1d4d9a',desc:'Lüks ve yüksek hız'},
+{id:'regera',name:'Koenigsegg Regera',emoji:'🏎️',price:146000,hp:300,top:245,handling:1.25,color:'#e7c54a',desc:'Hibrit hiper otomobil'},
+{id:'speedtail',name:'McLaren Speedtail',emoji:'🏎️',price:167000,hp:330,top:249,handling:1.28,color:'#e94c35',desc:'Aerodinamik hiper GT'},
+{id:'czinger',name:'Czinger 21C V Max',emoji:'🏎️',price:235000,hp:360,top:253,handling:1.3,color:'#a9a9b7',desc:'En üst seviye hiper otomobil'},
+{id:'supra',name:'Toyota Supra',emoji:'🏎️',price:47000,hp:215,top:210,handling:1.22,color:'#f0a02c',desc:'Özel yükseltme sınırları: motor Lv.5, turbo Lv.4'}
+];
+const defaultState={money:15000,unlockedModes:{morning:true,cargo:true,night:false,street:false},owned:[{id:'tofas',engine:0,turbo:0,tires:0,brakes:0,color:'#f0f0f0',spoiler:false,neon:false,sportRims:false,lowered:false}],selected:0,races:0,wins:0,level:1,cargoLast:0};
+let state;try{state=JSON.parse(localStorage.getItem('c48streetrush'))||JSON.parse(JSON.stringify(defaultState))}catch(e){state=JSON.parse(JSON.stringify(defaultState))}
+if(!state.unlockedModes)state.unlockedModes={morning:true,cargo:true,night:false,street:false};
+function save(){try{localStorage.setItem('c48streetrush',JSON.stringify(state))}catch(e){}renderAll()}
+function notify(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').classList.add('hidden'),2300)}
+function def(car=state.owned[state.selected]){return carDefs.find(x=>x.id===car.id)||carDefs[0]}
+function stats(car=state.owned[state.selected]){let d=def(car);return {hp:d.hp+car.engine*18+car.turbo*30,top:d.top+car.engine*7+car.turbo*12,handling:Math.min(1.5,d.handling+car.tires*.09+car.brakes*.025)}}
+function fmt(n){return Math.floor(n).toLocaleString('tr-TR')}
+function renderAll(){
+if(!state.owned.length)state.owned.push({id:'tofas',engine:0,turbo:0,tires:0,brakes:0,color:'#f0f0f0'});
+state.selected=Math.max(0,Math.min(state.selected,state.owned.length-1));
+$('money').textContent=fmt(state.money);const c=state.owned[state.selected],d=def(c),s=stats(c);
+$('activeCar').innerHTML=`<div class="garage-hero"><div class="garage-car-icon" style="color:${c.color||d.color}">${d.emoji}</div><div class="garage-car-title">${d.name}</div><p class="muted">${d.desc}</p><div class="garage-badges"><span class="garage-badge">⚡ ${s.hp} HP</span><span class="garage-badge">🏁 ${s.top} km/sa</span>${c.spoiler?'<span class="garage-badge installed">✓ Arka spoiler</span>':''}${c.neon?'<span class="garage-badge installed">✓ Yan neon</span>':''}</div><div class="progress"><span style="width:${Math.min(100,s.hp/3.2)}%"></span></div></div>`;
+$('power').textContent=s.hp;$('topSpeed').textContent=s.top;$('nitroStat').textContent=100+c.turbo*10;
+$('ownedCars').innerHTML=state.owned.map((x,i)=>{let z=carDefs.find(q=>q.id===x.id)||carDefs[0];return `<div class="carcard ${i===state.selected?'selected':''}"><div class="car-art" style="color:${x.color||z.color}">${z.emoji}</div><b>${z.name}</b><p class="muted">${z.hp+x.engine*18+x.turbo*30} HP</p><button style="width:100%;margin-top:7px" data-select="${i}" ${i===state.selected?'disabled':''}>${i===state.selected?'Seçili':'Arabayı seç'}</button></div>`}).join('');
+$('marketCars').innerHTML=carDefs.filter(x=>x.price>0&&!state.owned.some(o=>o.id===x.id)).map(x=>`<div class="item"><div><b>${x.emoji} ${x.name}</b><p>${x.hp} HP · ${x.top} km/sa<br>${x.desc}</p></div><button data-buy="${x.id}">₺${fmt(x.price)}</button></div>`).join('');
+const isSupra=c.id==='supra';
+const upgrades=[['engine','Motor','Motor gücü +18 HP',1200,isSupra?5:3],['turbo','Turbo','+30 HP ve +12 km/sa',2200,isSupra?4:2],['tires','Lastikler','Daha iyi yol tutuşu',900,3],['brakes','Fren','Daha kontrollü frenleme',700,3]];
+$('upgrades').innerHTML=upgrades.map(([id,name,desc,cost,max])=>{let n=c[id]||0;return `<div class="item"><div><b>${name} <span class="muted">Lv.${n}/${max}</span></b><p>${desc}</p></div><button data-upgrade="${id}" ${n>=max?'disabled':''}>${n>=max?'MAX':'₺'+fmt(cost*(n+1))}</button></div>`}).join('');
+const parts=[['spoiler','🏁 Arka spoiler',4500,'Sportif görünüm'],['neon','💡 Yan neon ışıkları',3500,'Yanlardan ışık yayar'],['sportRims','🛞 Spor jant',2500,'Siyah spor jantlar'],['lowered','⬇️ Alçak süspansiyon',4000,'Alçak görünüm']];
+$('parts').innerHTML=parts.map(([id,name,cost,desc])=>`<div class="item"><div><b>${name}</b><p>${desc}</p></div><button data-part="${id}" ${c[id]?'disabled':''}>${c[id]?'TAKILI':'₺'+fmt(cost)}</button></div>`).join('');
+$('races').textContent=state.races;$('wins').textContent=state.wins;$('level').textContent=state.level;
+}
+document.addEventListener('click',e=>{
+let b=e.target.closest('button');if(!b)return;
+if(b.dataset.mode){const m=b.dataset.mode,cost={morning:0,night:30000,street:55000,cargo:0}[m];if(m!=='morning'&&m!=='cargo'&&!state.unlockedModes[m]){if(state.money<cost)return notify('Bu modu açmak için ₺'+fmt(cost)+' gerekiyor.');state.money-=cost;state.unlockedModes[m]=true;save()}if(race&&race.running)return notify('Önce yarışı bitir.');currentMode=m;document.querySelectorAll('[data-mode]').forEach(x=>x.classList.toggle('active',x.dataset.mode===m));$('startRace').textContent=m==='cargo'?'🚨 Paketi At':m==='night'?'🌙 Gece Yarışı':'🏁 Yarışa Başla'}
+if(b.dataset.tab){document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));['garage','market','tuning','career'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab))}
+if(b.dataset.select!==undefined){state.selected=+b.dataset.select;save()}
+if(b.dataset.buy){let d=carDefs.find(x=>x.id===b.dataset.buy);if(state.money<d.price)return notify('Yeterli paran yok!');state.money-=d.price;state.owned.push({id:d.id,engine:0,turbo:0,tires:0,brakes:0,color:d.color});state.selected=state.owned.length-1;save();notify(d.name+' satın alındı!')}
+if(b.dataset.upgrade){let c=state.owned[state.selected],id=b.dataset.upgrade,cost={engine:1200,turbo:2200,tires:900,brakes:700}[id]*(c[id]+1),max={engine:c.id==='supra'?5:3,turbo:c.id==='supra'?4:2,tires:3,brakes:3}[id];if(c[id]>=max)return;if(state.money<cost)return notify('Yeterli paran yok!');state.money-=cost;c[id]++;save();notify('Yükseltme tamamlandı!')}
+if(b.dataset.part){let c=state.owned[state.selected],id=b.dataset.part,cost={spoiler:4500,neon:3500,sportRims:2500,lowered:4000}[id];if(c[id])return;if(state.money<cost)return notify('Yeterli paran yok!');state.money-=cost;c[id]=true;save();notify('Modifiye takıldı!')}
+});
+$('sellCar').onclick=()=>{if(state.owned.length<=1)return notify('Son arabanı satamazsın!');let c=state.owned[state.selected],d=def(c);state.money+=Math.round(d.price*.7);state.owned.splice(state.selected,1);state.selected=0;save()};
+document.addEventListener('click',e=>{let b=e.target.closest('[data-paint]');if(!b)return;let cost=+b.dataset.cost,c=state.owned[state.selected];if(state.money<cost)return notify('Yeterli paran yok!');state.money-=cost;c.color=b.dataset.paint;save();notify('Renk uygulandı!')});const canvas=$('game'),ctx=canvas.getContext('2d');let W=960,H=540,keys={},race=null,last=0,currentMode='morning',cargoLast=0;
+$('fullscreenBtn').onclick=async()=>{try{if(!document.fullscreenElement)await $('gameShell').requestFullscreen();else await document.exitFullscreen()}catch(e){notify('Tam ekran desteklenmiyor.')}};
+function startRace(){
+if(race&&race.running)return;
+if(currentMode==='cargo'&&Date.now()-cargoLast<60000)return notify('Paket Atma için bekle.');
+if(currentMode==='cargo'){cargoLast=Date.now();state.cargoLast=cargoLast;save()}
+let c=state.owned[state.selected],s=stats(c),finish={morning:1600,night:2500,street:2800,cargo:3000}[currentMode];
+race={mode:currentMode,countdown:3,running:true,ended:false,won:false,dist:0,speed:0,playerX:W/2,traffic:[],spawn:0,roadOffset:0,nitro:100,hp:s.hp,top:s.top,handling:s.handling,health:100,invuln:0,finish,reward:0,clean:true,policeGap:360,opponents:[]};
+$('startRace').classList.add('hidden');$('restartRace').classList.add('hidden');$('claim').classList.add('hidden');save();notify('Hazır ol! Yarış başlıyor.');
+}
+$('startRace').onclick=startRace;$('restartRace').onclick=startRace;
+$('claim').onclick=()=>{if(!race||!race.ended||!race.won)return;state.money+=race.reward;state.races++;state.wins++;state.level=1+Math.floor(state.wins/2);save();$('claim').classList.add('hidden');$('startRace').classList.remove('hidden');notify('₺'+fmt(race.reward)+' kazandın!')};
+function keyName(e){let k=e.key.toLowerCase();return ({arrowleft:'left',a:'left',arrowright:'right',d:'right',arrowup:'gas',w:'gas',arrowdown:'brake',s:'brake',' ':'nitro',shift:'nitro'})[k]}
+window.addEventListener('keydown',e=>{let k=keyName(e);if(k){keys[k]=true;e.preventDefault()}});
+window.addEventListener('keyup',e=>{let k=keyName(e);if(k)keys[k]=false});
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();keys[k]=true},up=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
+function drawCar(x,y,color,player=false,mods={},model='generic'){
+ctx.save();ctx.translate(x,y);const sport=model==='supra'||model==='czinger',sedan=model==='passat',half=sport?24:22,rear=sport?38:sedan?39:36;
+ctx.fillStyle='#0009';ctx.beginPath();ctx.ellipse(2,13,half+5,39,0,0,Math.PI*2);ctx.fill();ctx.fillStyle='#090d12';for(const wx of [-half,half])for(const wy of [-22,22]){ctx.beginPath();ctx.roundRect(wx-4,wy-8,8,16,2);ctx.fill()}
+ctx.fillStyle=color;ctx.beginPath();
+if(model==='supra'){ctx.moveTo(-14,-37);ctx.quadraticCurveTo(-21,-37,-23,-25);ctx.lineTo(-22,20);ctx.quadraticCurveTo(-20,34,-12,37);ctx.lineTo(13,37);ctx.quadraticCurveTo(22,32,22,19);ctx.lineTo(20,-20);ctx.quadraticCurveTo(17,-35,9,-38);ctx.closePath()}
+else if(model==='czinger'){ctx.moveTo(-10,-42);ctx.lineTo(10,-42);ctx.quadraticCurveTo(18,-38,20,-25);ctx.lineTo(23,19);ctx.lineTo(15,37);ctx.lineTo(-15,37);ctx.lineTo(-23,19);ctx.lineTo(-20,-25);ctx.quadraticCurveTo(-18,-38,-10,-42);ctx.closePath()}
+else if(model==='passat'){ctx.moveTo(-15,-37);ctx.quadraticCurveTo(-21,-35,-22,-25);ctx.lineTo(-22,25);ctx.quadraticCurveTo(-21,37,-13,38);ctx.lineTo(13,38);ctx.quadraticCurveTo(21,37,22,25);ctx.lineTo(22,-25);ctx.quadraticCurveTo(21,-35,15,-37);ctx.closePath()}
+else{ctx.moveTo(-18,-31);ctx.quadraticCurveTo(-20,-38,-11,-41);ctx.lineTo(11,-41);ctx.quadraticCurveTo(20,-38,18,-31);ctx.lineTo(22,23);ctx.quadraticCurveTo(21,35,13,37);ctx.lineTo(-13,37);ctx.quadraticCurveTo(-21,35,-22,23);ctx.closePath()}
+ctx.fill();ctx.fillStyle='#9fdcff';ctx.fillRect(-13,-24,26,16);ctx.fillStyle='#152433';ctx.fillRect(-12,1,24,13);ctx.fillStyle='#fff0c7';ctx.fillRect(-16,-33,8,4);ctx.fillRect(8,-33,8,4);ctx.fillStyle='#ff3148';ctx.fillRect(-17,29,9,4);ctx.fillRect(8,29,9,4);
+if(player&&mods.spoiler){ctx.fillStyle='#090d12';ctx.fillRect(-21,rear-8,42,4)}
+if(player&&mods.neon){ctx.save();ctx.globalAlpha=.85;ctx.fillStyle='#21d9ff';ctx.shadowColor='#21d9ff';ctx.shadowBlur=18;ctx.fillRect(-half-3,-13,3,35);ctx.fillRect(half,-13,3,35);ctx.restore()}
+ctx.restore();
+}
+function drawScene(){
+ctx.clearRect(0,0,W,H);ctx.fillStyle='#338c4d';ctx.fillRect(0,0,W,H);
+let scroll=race?race.roadOffset:0;
+for(let i=0;i<16;i++){let y=((i*60+scroll)%(H+60))-30,x=i%2?40:W-40;ctx.fillStyle=i%3?'#287d3e':'#1d6937';ctx.beginPath();ctx.arc(x,y,20,0,Math.PI*2);ctx.fill();ctx.fillStyle=['#ffcf4a','#ff7eb6','#fff'][i%3];ctx.fillRect(x+18,y+20,4,4)}
+ctx.fillStyle='#29323c';ctx.fillRect(210,0,540,H);ctx.strokeStyle='#f7f1d6';ctx.lineWidth=4;ctx.setLineDash([28,26]);ctx.lineDashOffset=-(scroll%54);ctx.beginPath();ctx.moveTo(390,0);ctx.lineTo(390,H);ctx.moveTo(570,0);ctx.lineTo(570,H);ctx.stroke();ctx.setLineDash([]);
+if(!race){drawCar(W/2,H*.72,'#e53d4f',true);ctx.fillStyle='#fff';ctx.font='900 28px Arial';ctx.textAlign='center';ctx.fillText('C48 STREET RUSH',W/2,65);return}
+race.traffic.forEach(t=>drawCar(t.x,t.y,t.color));let c=state.owned[state.selected],d=def(c);drawCar(race.playerX,H*.76,c.color||d.color,true,c,d.id);
+if(race.countdown>0){ctx.fillStyle='#050a11aa';ctx.fillRect(0,0,W,H);ctx.fillStyle='#fff';ctx.font='900 86px Arial';ctx.textAlign='center';ctx.fillText(Math.ceil(race.countdown),W/2,H/2)}
+if(race.ended){ctx.fillStyle='#050a11bb';ctx.fillRect(0,0,W,H);ctx.fillStyle=race.won?'#ffc857':'#ff6575';ctx.font='900 48px Arial';ctx.textAlign='center';ctx.fillText(race.caught?'YAKALANDIN':race.won?'YARIŞ TAMAMLANDI':'YARIŞ BİTTİ',W/2,H/2)}
+}
+function update(dt){
+if(!race||!race.running)return;dt=Math.min(dt,.035);
+if(race.countdown>0){race.countdown-=dt;return}
+let kmh=race.speed*3.6,nitro=keys.nitro&&race.nitro>0&&race.speed>5;
+if(keys.gas)race.speed+=race.hp/150*45*dt;else race.speed-=12*dt;
+if(keys.brake)race.speed-=60*dt;
+if(nitro){race.speed+=115*dt;race.nitro=Math.max(0,race.nitro-28*dt)}else race.nitro=Math.min(100,race.nitro+5*dt);
+race.speed=Math.max(0,Math.min(race.top*(nitro?1.65:1)/3.6,race.speed));
+if(keys.left)race.playerX-=260*race.handling*dt;if(keys.right)race.playerX+=260*race.handling*dt;
+race.playerX=Math.max(245,Math.min(715,race.playerX));race.dist+=race.speed*dt;race.roadOffset+=race.speed*dt*2.5;
+race.spawn-=dt;
+if(race.spawn<=0){let fast=race.speed*3.6,over=Math.max(0,fast-200);race.spawn=fast<=200?1.65:Math.max(.38,1.65-over/95);race.traffic.push({x:290+Math.random()*380,y:-70,color:['#e4a84a','#47a4d8','#b56fe3','#e8e9ed'][Math.floor(Math.random()*4)]})}
+race.traffic.forEach(t=>t.y+=(race.speed*3.6+100)*dt);
+race.traffic=race.traffic.filter(t=>t.y<H+70);
+for(let t of race.traffic){if(race.invuln<=0&&Math.abs(t.y-H*.76)<52&&Math.abs(t.x-race.playerX)<40){let damage=race.speed*3.6>210?40:race.speed*3.6>160?32:25;race.speed*=.45;race.clean=false;race.health-=damage;race.invuln=1.1;race.nitro=Math.max(0,race.nitro-20);notify('KAZA! -'+damage+' CAN');if(race.health<=0){race.running=false;race.ended=true;race.won=false}}}
+race.invuln=Math.max(0,race.invuln-dt);race.dist+=race.speed*dt;
+$('speed').textContent=Math.round(race.speed*3.6);$('distance').textContent=fmt(race.dist);$('health').textContent=Math.max(0,race.health);$('nitroHud').textContent=Math.round(race.nitro);$('nitroBar').style.width=race.nitro+'%';
+if(race.mode==='cargo'){race.policeGap+=(race.speed-155/3.6)*dt*2.2;if(race.policeGap<58){race.caught=true;race.running=false;race.ended=true;state.money=Math.max(0,state.money-3000);save();notify('YAKALANDIN! Ceza ₺3.000')}}
+if(race.dist>=race.finish){race.running=false;race.ended=true;race.won=true;race.reward=race.mode==='morning'?3500+(race.clean?1000:0):race.mode==='cargo'?30000+(race.clean?6000:0):15000;$('claim').classList.remove('hidden');$('restartRace').classList.remove('hidden');$('startRace').classList.add('hidden')}
+if(race.ended){$('restartRace').classList.remove('hidden');$('startRace').classList.add('hidden')}
+$('raceState').textContent=race.ended?(race.caught?'YAKALANDIN':race.won?'YARIŞ TAMAMLANDI':'KAZA YAPTIN'):'YARIŞTA';
+}
+function loop(t){let dt=(t-last)/1000||0;last=t;update(dt);drawScene();requestAnimationFrame(loop)}
+renderAll();drawScene();requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
