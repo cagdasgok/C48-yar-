@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C48 Studios — Street Rush v1.0.4</title>
+<title>C48 Studios — Street Rush v1.0.7</title>
 <style>
 :root{--bg:#090d14;--panel:#111a27;--line:#25354a;--red:#ff3b4e;--gold:#ffc857;--text:#edf4ff;--muted:#91a3b9}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17243a,#090d14 65%);color:var(--text);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
@@ -170,8 +170,8 @@ function awardRankProgress(mode){let old=getRank(mode);if(old>=18)return null;le
 
 if(!state.unlockedModes.drift)state.unlockedModes.drift=true;if(!state.unlockedModes.drag)state.unlockedModes.drag=true;
 // v0.6.2 release: new players start with ₺15,000. Existing saved progress is preserved.
-try{if(!localStorage.getItem('c48streetrush'))localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.5')}catch(e){}
-function save(){try{localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.5')}catch(e){}renderAll()}
+try{if(!localStorage.getItem('c48streetrush'))localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.8')}catch(e){}
+function save(){try{localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.8')}catch(e){}renderAll()}
 function notify(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').classList.add('hidden'),2300)}
 function def(car=state.owned[state.selected]){return carDefs.find(x=>x.id===car.id)||carDefs[0]}
 function stats(car=state.owned[state.selected]){let d=def(car);return {hp:d.hp+car.engine*18+car.turbo*30,top:d.top+car.engine*7+car.turbo*12,handling:Math.min(1.5,d.handling+car.tires*.09+car.brakes*.025)}}
@@ -270,7 +270,7 @@ function startRace(dragOpponent=null){
  let c=state.owned[state.selected],s=stats(c);
  const finish={morning:1600,night:2500,street:2800,cargo:3000,drift:1800,drag:600}[mode];
  const opponents=mode==='night'?3:mode==='street'?5:mode==='drag'?1:0;
- race={mode,weather:currentWeather,driftScore:0,skid:0,countdown:mode==='drag'?3.6:3,running:true,ended:false,won:false,dist:0,speed:0,lane:1,playerX:W*.5,traffic:[],spawn:0,roadOffset:0,nitro:100,hp:mode==='drag'?200:s.hp,top:mode==='drag'?180:s.top,handling:mode==='drag'?1.15:s.handling,hit:0,health:100,invuln:0,lastDamage:0,damageTimer:0,elapsed:0,finish,reward:0,clean:true,opponents:Array.from({length:opponents},(_,i)=>({lane:i%Math.min(mode==='night'?5:2,5),y:H*.72-60-i*65,color:['#f0f0f0','#e53d4f','#39a5ff','#ffc857','#52d273'][i%5],progress:Math.random()*30+5,dist:Math.random()*180,speed:mode==='night'?145+Math.random()*35:160+Math.random()*55,rank:i+1,changeIn:2+Math.random()*4})),caught:false,policeGap:mode==='cargo'?360:650,policeHeat:1,policeFlash:0,roadblockTimer:8,roadblock:null,escapeTime:0,dragOpponent:dragOpponent||null,dragOpponentDist:0,dragOpponentSpeed:dragOpponent?(180*(currentWeather==='rain'?.94:1))/3.6:0,dragLight:'red',dragLightTimer:0.8,dragStarted:false,dragFlash:0};
+ race={mode,weather:currentWeather,driftScore:0,skid:0,countdown:mode==='drag'?3.6:3,running:true,ended:false,won:false,dist:0,speed:0,lane:1,playerX:W*.5,lateralVelocity:0,steerLean:0,traffic:[],spawn:0,roadOffset:0,nitro:100,hp:mode==='drag'?200:s.hp,top:mode==='drag'?180:s.top,handling:mode==='drag'?1.15:s.handling,hit:0,health:100,invuln:0,lastDamage:0,damageTimer:0,elapsed:0,finish,reward:0,clean:true,opponents:Array.from({length:opponents},(_,i)=>({lane:i%Math.min(mode==='night'?5:2,5),lanePos:i%Math.min(mode==='night'?5:2,5),steerLean:0,y:H*.72-60-i*65,color:['#f0f0f0','#e53d4f','#39a5ff','#ffc857','#52d273'][i%5],progress:Math.random()*30+5,dist:Math.random()*180,speed:mode==='night'?145+Math.random()*35:160+Math.random()*55,rank:i+1,changeIn:2+Math.random()*4})),caught:false,policeGap:mode==='cargo'?360:650,policeHeat:1,policeFlash:0,roadblockTimer:8,roadblock:null,escapeTime:0,dragOpponent:dragOpponent||null,dragOpponentDist:0,dragOpponentSpeed:dragOpponent?(180*(currentWeather==='rain'?.94:1))/3.6:0,dragLight:'red',dragLightTimer:0.8,dragStarted:false,dragFlash:0};
  $('chasePanel').classList.toggle('active',mode==='cargo');$('chaseMeter').style.width='55%';$('chaseStatus').textContent='MESAFE 360 m';$('startRace').classList.add('hidden');$('restartRace').classList.add('hidden');$('claim').classList.add('hidden');$('raceState').textContent='3';$('health').textContent='100';$('nitroHud').textContent='100';$('nitroBar').style.width='100%';
  save();notify(mode==='cargo'?'Paket Atma başladı! Polis peşinde!':mode==='drift'?'Drift başladı! Virajlarda yön değiştirerek puan topla.':mode==='drag'?'Drag düellosu! Kırmızı-sarı-yeşil ışıkları bekle!':'Hazır ol! Geri sayım başlıyor.');
 }
@@ -354,14 +354,35 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
    }
  }
  const laneCount=mode==='night'||mode==='cargo'?5:(mode==='street'||mode==='drag')?2:3, roadHalf=mode==='night'||mode==='cargo'?300:(mode==='street'||mode==='drag')?180:250;
- ctx.fillStyle='#26303a';ctx.fillRect(W*.5-roadHalf,0,roadHalf*2,H);
- // Fine asphalt texture that drifts with the road for a sense of motion.
- for(let i=0;i<42;i++){let tx=W*.5-roadHalf+((i*83)%Math.max(1,roadHalf*2)),ty=((i*47+scroll*2.4)%(H+20))-10;ctx.fillStyle=i%3===0?'#ffffff10':'#02070b18';ctx.fillRect(tx,ty,i%4===0?3:2,i%5===0?5:3);} 
- 
- if(mode==='night'||mode==='cargo'){ctx.fillStyle='#8794a4';ctx.fillRect(W*.5-roadHalf-10,0,10,H);ctx.fillRect(W*.5+roadHalf,0,10,H);}
- ctx.strokeStyle='#e8edf055';ctx.lineWidth=4;ctx.strokeRect(W*.5-roadHalf+5,0,roadHalf*2-10,H);
- ctx.strokeStyle='#f7f1d6';ctx.lineWidth=3;ctx.setLineDash([28,26]);ctx.lineDashOffset=-(race?race.roadOffset%54:0);
- for(let i=1;i<laneCount;i++){let x=W*.5-roadHalf+(roadHalf*2/ laneCount)*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}ctx.setLineDash([]);
+ const roadLeft=W*.5-roadHalf, roadRight=W*.5+roadHalf;
+ // Roadside shoulder: layered edge bands add depth without expensive per-frame assets.
+ const shoulder=ctx.createLinearGradient(roadLeft-24,0,roadLeft+roadHalf*2+24,0);
+ shoulder.addColorStop(0,'#111b20');shoulder.addColorStop(.045,mode==='night'?'#3a4651':'#b0a58a');shoulder.addColorStop(.055,mode==='night'?'#17212c':'#d1c5a8');shoulder.addColorStop(.075,'#313a40');shoulder.addColorStop(.5,'#313a40');shoulder.addColorStop(.925,'#313a40');shoulder.addColorStop(.945,mode==='night'?'#d0d8df':'#d1c5a8');shoulder.addColorStop(.955,mode==='night'?'#687684':'#b0a58a');shoulder.addColorStop(1,'#111b20');
+ ctx.fillStyle=shoulder;ctx.fillRect(roadLeft-24,0,roadHalf*2+48,H);
+ // Subtle asphalt gradient keeps the center readable and the edges naturally darker.
+ const asphalt=ctx.createLinearGradient(roadLeft,0,roadRight,0);asphalt.addColorStop(0,'#202a33');asphalt.addColorStop(.12,'#303b45');asphalt.addColorStop(.5,'#39434c');asphalt.addColorStop(.88,'#303b45');asphalt.addColorStop(1,'#202a33');
+ ctx.fillStyle=asphalt;ctx.fillRect(roadLeft,0,roadHalf*2,H);
+ // Fine, deterministic asphalt flecks scroll with the road; kept deliberately low-count for performance.
+ for(let i=0;i<48;i++){let tx=roadLeft+((i*83+17)%Math.max(1,roadHalf*2)),ty=((i*47+scroll*2.4)%(H+20))-10;ctx.fillStyle=i%4===0?'#ffffff12':'#02070b1c';ctx.fillRect(tx,ty,i%4===0?3:2,i%5===0?5:3);}
+ // Dashed red/white rumble strips on the outer edge, with a matching slim safety line.
+ const curbOffset=(scroll*1.25)%44;
+ for(let y=-44+curbOffset;y<H+44;y+=44){
+   ctx.fillStyle='#f4f0e8';ctx.fillRect(roadLeft-8,y,8,23);ctx.fillRect(roadRight,y,8,23);
+   ctx.fillStyle='#d9444d';ctx.fillRect(roadLeft-8,y+23,8,21);ctx.fillRect(roadRight,y+23,8,21);
+ }
+ if(mode==='night'||mode==='cargo'){
+   ctx.fillStyle='#9aa8b7';ctx.fillRect(roadLeft-13,0,3,H);ctx.fillRect(roadRight+10,0,3,H);
+   ctx.fillStyle='#ffffff22';ctx.fillRect(roadLeft-2,0,2,H);ctx.fillRect(roadRight,0,2,H);
+ }
+ ctx.strokeStyle='#e8edf0aa';ctx.lineWidth=2;ctx.strokeRect(roadLeft+2,0,roadHalf*2-4,H);
+ // Lane markers have a soft shadow beneath crisp, warm-white paint.
+ ctx.lineCap='butt';ctx.lineWidth=5;ctx.strokeStyle='#080d1288';ctx.setLineDash([28,26]);ctx.lineDashOffset=-(race?race.roadOffset%54:0);
+ for(let i=1;i<laneCount;i++){let x=roadLeft+(roadHalf*2/laneCount)*i;ctx.beginPath();ctx.moveTo(x+1,0);ctx.lineTo(x+1,H);ctx.stroke();}
+ ctx.lineWidth=3;ctx.strokeStyle=mode==='night'?'#fff2c8':'#f5f0d9';
+ for(let i=1;i<laneCount;i++){let x=roadLeft+(roadHalf*2/laneCount)*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+ ctx.setLineDash([]);
+ // A few short reflective studs near the edges improve speed perception at a tiny render cost.
+ for(let i=0;i<12;i++){const y=((i*53+scroll*2.1)%(H+12))-6;ctx.fillStyle=mode==='night'?'#ffdf9a88':'#dce7ed66';ctx.fillRect(roadLeft+12,y,3,2);ctx.fillRect(roadRight-15,y,3,2);}
  if(!race){drawCar(W*.5,H*.72,'#e53d4f',true);ctx.fillStyle='#eaf2ff';ctx.font='900 28px system-ui';ctx.textAlign='center';ctx.fillText('C48 STREET RUSH',W/2,65);ctx.font='16px system-ui';ctx.fillStyle='#a9bbd0';ctx.fillText('Yarışa başlamak için butona bas',W/2,95);return}
  if(mode==='drag'){
    // Drag strip: green grass shoulders, hard safety barriers, spectators only behind barriers.
@@ -460,7 +481,7 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
    return;
  }
  race.traffic.forEach(t=>drawCar(roadX(t.y)+t.lane*70,t.y,t.color));
- if(race.mode!=='drag'&&race.opponents)race.opponents.forEach(o=>{const gap=o.dist-race.dist;o.y=Math.max(-90,Math.min(H+90,H*.76-gap*0.42));const lanes=race.mode==='night'||race.mode==='cargo'?5:2,half=race.mode==='night'||race.mode==='cargo'?280:160;let x=W*.5-half+((o.lane+.5)*(half*2/lanes));drawCar(x,o.y,o.color);});
+ if(race.mode!=='drag'&&race.opponents)race.opponents.forEach(o=>{const gap=o.dist-race.dist;o.y=Math.max(-90,Math.min(H+90,H*.76-gap*0.42));const lanes=race.mode==='night'||race.mode==='cargo'?5:2,half=race.mode==='night'||race.mode==='cargo'?280:160;const lanePos=Number.isFinite(o.lanePos)?o.lanePos:o.lane;let x=W*.5-half+((lanePos+.5)*(half*2/lanes));ctx.save();ctx.translate(x,o.y);ctx.rotate((o.steerLean||0)*.055);drawCar(0,0,o.color);ctx.restore();});
  if(race.mode==='cargo'&&!race.caught){
    const gap=race.policeGap??360, py=H*.76+Math.min(115,Math.max(22,gap*.24));
    // Red/blue flashing glow and two patrol cars pursuing from behind.
@@ -471,8 +492,8 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
    ctx.textAlign='center';ctx.font='900 12px system-ui';ctx.fillStyle='#fff';ctx.fillText('POLİS',race.playerX,py+53);ctx.restore();
    if(race.roadblock){ctx.save();const by=H*.35;ctx.fillStyle='#f5bd43';ctx.fillRect(W*.5-110,by,220,13);ctx.fillStyle='#1a2029';for(let q=0;q<8;q++){ctx.beginPath();ctx.moveTo(W*.5-105+q*28,by);ctx.lineTo(W*.5-95+q*28,by);ctx.lineTo(W*.5-108+q*28,by+13);ctx.lineTo(W*.5-118+q*28,by+13);ctx.fill()}ctx.fillStyle='#ff4057';ctx.font='900 15px system-ui';ctx.fillText('POLİS BARİKATI',W*.5,by-9);ctx.restore();}
  }
- let c=state.owned[state.selected],d=def(c);drawCar(race.playerX,H*.76,c.color||d.color,true,c,d.id);if(race.damageTimer>0){ctx.save();ctx.textAlign='center';ctx.fillStyle='#ff596b';ctx.font='900 28px system-ui';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText('-'+race.lastDamage+' CAN',race.playerX,H*.76-55);ctx.restore()}
- if(keys.nitro&&race.nitro>0&&race.speed>2){ctx.fillStyle='#3bd7ff';ctx.globalAlpha=.7;ctx.beginPath();ctx.moveTo(race.playerX-8,H*.76+34);ctx.lineTo(race.playerX,H*.76+75+Math.random()*20);ctx.lineTo(race.playerX+8,H*.76+34);ctx.fill();ctx.globalAlpha=1}
+ let c=state.owned[state.selected],d=def(c);ctx.save();ctx.translate(race.playerX,H*.76);ctx.rotate((race.steerLean||0)*.055);drawCar(0,0,c.color||d.color,true,c,d.id);ctx.restore();if(race.damageTimer>0){ctx.save();ctx.textAlign='center';ctx.fillStyle='#ff596b';ctx.font='900 28px system-ui';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText('-'+race.lastDamage+' CAN',race.playerX,H*.76-55);ctx.restore()}
+ if(keys.nitro&&race.nitro>0&&race.speed>2){const boostPulse=.82+Math.sin(anim*32)*.12;ctx.save();ctx.shadowColor='#39dfff';ctx.shadowBlur=16;ctx.fillStyle='#3bd7ff';ctx.globalAlpha=boostPulse;ctx.beginPath();ctx.moveTo(race.playerX-9,H*.76+34);ctx.lineTo(race.playerX,H*.76+68+Math.sin(anim*27)*5);ctx.lineTo(race.playerX+9,H*.76+34);ctx.closePath();ctx.fill();ctx.fillStyle='#fff4b0';ctx.beginPath();ctx.moveTo(race.playerX-4,H*.76+35);ctx.lineTo(race.playerX,H*.76+53+Math.sin(anim*35)*3);ctx.lineTo(race.playerX+4,H*.76+35);ctx.closePath();ctx.fill();ctx.restore();}
  if(race.countdown>0){ctx.fillStyle='#050a11aa';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.font='900 86px system-ui';ctx.fillText(Math.ceil(race.countdown),W/2,H/2);ctx.font='18px system-ui';ctx.fillText('HAZIR OL!',W/2,H/2+42)}
  if(race.ended){ctx.fillStyle='#050a11bb';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle=race.won?'#ffc857':'#ff6575';ctx.font='900 48px system-ui';ctx.fillText(race.caught?'YAKALANDIN':race.won?'YARIŞ TAMAMLANDI':race.mode==='cargo'?'YAKALANDIN':'YARIŞ BİTTİ',W/2,H/2-12);ctx.fillStyle='#fff';ctx.font='22px system-ui';ctx.fillText(race.caught?'Polis seni yakaladı · Ceza: ₺3.000':race.won?'Ödül: ₺'+fmt(race.reward)+(race.mode==='cargo'?(race.clean?' (hasarsız +₺6.000)':''):race.mode==='morning'&&race.clean?' (hasarsız +₺1.000)':'')+(race.rank?' · Sıra: '+race.rank+'.':''):'Daha hızlı ol! Tekrar deneyebilirsin.',W/2,H/2+30)}
 
@@ -483,14 +504,32 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
 }
 function finishDrag(won){if(!race||race.ended)return;race.running=false;race.ended=true;race.won=won;race.reward=won?9000:-4000;race.dist=Math.min(600,race.dist);if(won){$('raceState').textContent='DRAG ZAFERİ! +₺9.000';notify('🏆 Drag zaferi! ₺9.000 ödül seni bekliyor.');$('claim').classList.remove('hidden')}else{state.money=Math.max(0,state.money-4000);save();$('raceState').textContent='DRAG KAYBEDİLDİ · −₺4.000';notify('Drag yarışını kaybettin. ₺4.000 kesildi.')} $('restartRace').classList.remove('hidden');$('startRace').classList.add('hidden')}
 function update(dt){if(!race||!race.running)return;dt=Math.min(dt,.035);race.elapsed+=dt;if(race.mode==='drag'&&race.countdown>0){race.countdown-=dt;const phase=3.6-race.countdown;race.dragLight=phase<1.2?'red':phase<2.4?'yellow':'green';if(phase>=2.4&&!race.dragStarted){race.dragStarted=true;notify('🟢 YEŞİL! GAZLA!')}return}if(race.countdown>0){race.countdown-=dt;if(race.countdown<=0)notify('BAŞLA! Gazla ve rakipleri geç!');return}let accel=keys.gas?1:0,brake=keys.brake?1:0,nitro=keys.nitro&&race.nitro>0&&race.speed>30;
- let max=race.top*(nitro?1.65:1)/3.6;if(race.weather==='rain')max*=.94;if(accel)race.speed+=((race.hp/150)*45)*dt;else race.speed-=12*dt;if(brake)race.speed-=60*dt;if(nitro){race.speed+=115*dt;race.nitro=Math.max(0,race.nitro-28*dt)}else race.nitro=Math.min(100,race.nitro+5*dt);race.speed=Math.max(0,Math.min(max,race.speed));
- const grip=race.weather==='rain'?.78:race.weather==='fog'?.93:1;const steer=race.handling*grip;if(keys.left)race.playerX-=260*steer*dt;if(keys.right)race.playerX+=260*steer*dt;
- if(race.mode==='drift'&&race.speed*3.6>65&&(keys.left||keys.right)){race.driftScore+=Math.min(120,race.speed*grip)*dt;race.skid+=dt;}
- let center=roadX(H*.76),edge=230;if(Math.abs(race.playerX-center)>edge){race.speed=Math.max(0,race.speed-65*dt);race.hit=1}
+ // Smoother vehicle dynamics: engine power affects acceleration, aerodynamic drag
+ // increases with speed, and nitro adds a short, controlled boost instead of a huge jump.
+ const hpFactor=Math.max(.72,Math.min(1.5,(race.hp||150)/220));
+ const baseTop=Math.max(1,race.top)/3.6;
+ const grip=race.weather==='rain'?.70:race.weather==='fog'?.91:1;
+ let max=baseTop*(nitro?1.18:1);if(race.weather==='rain')max*=.94;
+ if(accel){const engineAccel=(4.4*hpFactor)*(1-Math.min(.68,race.speed/Math.max(.1,baseTop)*.68));race.speed+=engineAccel*dt}
+ else race.speed-=((2.0)+(race.speed*.055))*dt;
+ if(brake)race.speed-=Math.min(10,5.5+race.speed*.8)*dt;
+ if(nitro){race.speed+=5.2*dt;race.nitro=Math.max(0,race.nitro-23*dt)}else race.nitro=Math.min(100,race.nitro+7*dt);
+ race.speed=Math.max(0,Math.min(max,race.speed));
+ // Steering has inertia and grip limits. Wet roads feel looser; opposite input settles the car gradually.
+ const steerInput=(keys.right?1:0)-(keys.left?1:0);
+ const speedFactor=.42+Math.min(1,race.speed/Math.max(.1,baseTop))*.72;
+ const steerForce=steerInput*245*(race.handling||1)*grip*speedFactor;
+ race.lateralVelocity=(race.lateralVelocity||0)+steerForce*dt;
+ const lateralDamping=(keys.left||keys.right)?1.25:4.2;
+ race.lateralVelocity*=Math.max(0,1-lateralDamping*dt);
+ race.playerX+=race.lateralVelocity*dt;
+ race.steerLean+=(steerInput-race.steerLean)*Math.min(1,dt*7);
+ if(race.mode==='drift'&&race.speed*3.6>65&&(keys.left||keys.right)){race.driftScore+=Math.min(120,race.speed*grip+Math.abs(race.lateralVelocity)*.12)*dt;race.skid+=dt;}
+ let center=roadX(H*.76),edge=230;if(Math.abs(race.playerX-center)>edge){race.speed=Math.max(0,race.speed-18*dt);race.lateralVelocity*=.78;race.hit=1}
  race.playerX=Math.max(center-edge,Math.min(center+edge,race.playerX));race.dist+=race.speed*dt;race.roadOffset+=race.speed*dt*2.5;if(race.mode==='drag'&&race.dragOpponent){race.dragOpponentDist+=race.dragOpponentSpeed*dt;if(race.dragOpponentDist>=600&&race.dist<600){finishDrag(false);return}}
  if(race.mode!=='drag'){race.spawn-=dt;if(race.spawn<=0){const fast=race.speed*3.6;const baseMin=(race.mode==='night'||race.mode==='cargo')?0.72:0.38;/* Zorluk artışı yalnızca 200 km/sa üstünde */const over200=Math.max(0,fast-200);const spawnInterval=fast<=200?1.65:Math.max(baseMin,1.65-over200/95);race.spawn=spawnInterval;race.traffic.push({y:-75,lane:Math.floor(Math.random()*(race.mode==='night'||race.mode==='cargo'?5:race.mode==='street'?2:3))-(race.mode==='night'||race.mode==='cargo'?2:race.mode==='street'?0:1),color:['#e4a84a','#47a4d8','#b56fe3','#e8e9ed'][Math.floor(Math.random()*4)],v:Math.max(65,fast*.55+Math.random()*75),wobble:Math.random()<.22?1:0})}}
  if(race.mode!=='drag')race.traffic.forEach(t=>{const kmh=race.speed*3.6;const relative=Math.max(95,kmh*1.65+45-t.v*.48);t.y+=relative*dt*(1+kmh/260);if(t.wobble&&t.y>40&&t.y<H*.55&&Math.random()<dt*.35)t.lane+=Math.random()<.5?-0.015:0.015;});
-for(const o of (race.opponents||[])){o.dist+=o.speed/3.6*dt;o.changeIn-=dt;if(o.changeIn<=0){o.lane=Math.max(0,Math.min((race.mode==='night'?4:1),o.lane+(Math.random()<.5?-1:1)));o.changeIn=2.5+Math.random()*4;if(Math.random()<.35)o.speed+=3+Math.random()*8;}}if(race.mode==='cargo'&&!race.caught){
+for(const o of (race.opponents||[])){o.dist+=o.speed/3.6*dt;const maxLane=(race.mode==='night'||race.mode==='cargo')?4:1;if(!Number.isFinite(o.lanePos))o.lanePos=o.lane;if(!Number.isFinite(o.targetLane))o.targetLane=o.lane;o.changeIn-=dt;if(o.changeIn<=0){const previous=o.targetLane;o.targetLane=Math.max(0,Math.min(maxLane,o.targetLane+(Math.random()<.5?-1:1)));if(o.targetLane!==previous)o.steerLean=Math.sign(o.targetLane-previous);o.changeIn=2.5+Math.random()*4;if(Math.random()<.35)o.speed+=3+Math.random()*8;}const laneDelta=o.targetLane-o.lanePos;o.lanePos+=laneDelta*Math.min(1,dt*1.65);if(Math.abs(laneDelta)<.025)o.lanePos=o.targetLane;o.steerLean=(o.steerLean||0)*Math.max(0,1-dt*1.8);o.lane=o.targetLane;}if(race.mode==='cargo'&&!race.caught){
    const kmh=race.speed*3.6;race.policeHeat=Math.min(5,1+Math.floor(race.dist/650));
    // Faster driving opens the gap; slowing down, impacts and roadblocks let police close in.
    race.policeGap+=(race.speed-155/3.6)*dt*(2.2+race.policeHeat*.28);
