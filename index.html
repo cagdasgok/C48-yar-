@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>C48 Studios — Street Rush v1.0.7</title>
+<title>C48 Studios — Street Rush v1.2</title>
 <style>
 :root{--bg:#090d14;--panel:#111a27;--line:#25354a;--red:#ff3b4e;--gold:#ffc857;--text:#edf4ff;--muted:#91a3b9}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#17243a,#090d14 65%);color:var(--text);font:15px/1.4 system-ui,Segoe UI,Arial,sans-serif}
@@ -68,6 +68,20 @@ canvas{border-color:#425b78;box-shadow:0 14px 36px #0008,0 0 0 1px #ffffff06;ani
 .rank-status{display:inline-flex;align-items:center;gap:4px;font-size:9px;letter-spacing:.8px;font-weight:950;padding:4px 7px;border-radius:99px;border:1px solid color-mix(in srgb,var(--rank) 55%,#26364a);background:color-mix(in srgb,var(--rank) 12%,#0b121c);color:var(--rank);margin-top:5px}
 @media(max-width:420px){.rank-card{grid-template-columns:44px minmax(0,1fr) auto;gap:9px;padding:10px}.rank-medal{width:42px;height:42px;font-size:23px;border-radius:12px}.rank-title{font-size:14px}.rank-score{min-width:44px}.rank-score b{font-size:12px}}
 
+
+.compare-panel{margin-top:14px;padding:13px;border:1px solid #34475d;border-radius:12px;background:linear-gradient(145deg,#101b29,#0b121c)}.compare-panel h3{margin:0 0 5px}.compare-results{display:grid;gap:7px;margin-top:12px}.compare-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;padding:8px 9px;border:1px solid #26364a;border-radius:8px;background:#0b121c;font-size:12px}.compare-row .metric{text-align:center;color:var(--muted);font-size:11px}.compare-row .left{text-align:left}.compare-row .right{text-align:right}.compare-row b{font-size:14px}.compare-row .better{color:#7ee8b2}.compare-note{font-size:11px;color:var(--muted);margin-top:8px}
+
+/* v1.2 body-kit showroom */
+.bodykit-showroom{position:relative;overflow:hidden;margin:12px 0 16px;padding:15px;border:1px solid #344d68;border-radius:16px;background:radial-gradient(ellipse at 50% 40%,#304b66 0%,#142236 48%,#080f19 100%);box-shadow:inset 0 1px #ffffff10,0 14px 30px #0004}
+.bodykit-showroom:before{content:"";position:absolute;left:8%;right:8%;bottom:48px;height:2px;background:linear-gradient(90deg,transparent,#ff3b4eaa,#5ddcffaa,transparent);box-shadow:0 0 24px #3edbff55}
+.bodykit-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;position:relative;z-index:1}
+.bodykit-heading small{color:#a7bdd4}.bodykit-stage{height:220px;display:flex;align-items:center;justify-content:center;position:relative;z-index:1;perspective:700px}
+.bodykit-car{width:min(100%,380px);height:220px;filter:drop-shadow(0 18px 14px #0009);overflow:visible;animation:showroom-float 4s ease-in-out infinite}
+.bodykit-controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}
+.bodykit-controls .item{padding:9px 0}.bodykit-tag{font-size:11px;padding:4px 8px;border-radius:20px;background:#142b3c;border:1px solid #3b607a;color:#bceaff}
+@keyframes showroom-float{0%,100%{transform:translateY(1px) rotateX(1deg)}50%{transform:translateY(-4px) rotateX(-1deg)}}
+@media(max-width:520px){.bodykit-stage{height:190px}.bodykit-car{height:190px}.bodykit-controls{grid-template-columns:1fr}}
+
 </style>
 </head>
 <body>
@@ -99,6 +113,7 @@ canvas{border-color:#425b78;box-shadow:0 14px 36px #0008,0 0 0 1px #ffffff06;ani
   <section id="tab-garage">
     <h2>Garajın</h2><div id="activeCar"></div><div class="stats"><div class="stat"><small>GÜÇ</small><b id="power">120</b><small>HP</small></div><div class="stat"><small>SON HIZ</small><b id="topSpeed">180</b><small>km/sa</small></div><div class="stat"><small>NİTRO</small><b id="nitroStat">100</b><small>%</small></div></div>
     <h3>Arabaların</h3><div class="carlist" id="ownedCars"></div>
+    <div class="compare-panel" id="comparePanel"><h3>⚖️ Araç Karşılaştırma</h3><p class="muted">Garajındaki iki arabanın yükseltmeler dahil performansını karşılaştır.</p><label for="compareCar" class="muted" style="display:block;margin:8px 0 5px;font-size:12px">Karşılaştırılacak araç</label><select id="compareCar" style="width:100%;padding:10px;border-radius:8px;background:#0b121c;color:var(--text);border:1px solid var(--line);font:inherit"></select><div id="compareResults" class="compare-results"></div></div>
   </section>
   <section id="tab-collection" class="hidden">
     <h2>🏅 Araç Koleksiyonun</h2>
@@ -111,14 +126,17 @@ canvas{border-color:#425b78;box-shadow:0 14px 36px #0008,0 0 0 1px #ffffff06;ani
     <div id="collectionCars" class="carlist"></div>
   </section>
   <section id="tab-market" class="hidden"><h2>İkinci El Galeri</h2><p class="muted">Yeni bir araç al, garajını büyüt. Her araç farklı sürüş karakterine sahip.</p><div id="marketCars"></div><div class="item"><div><b>Seçili arabayı sat</b><p>Aracın değerinin %70'ini alırsın. Son arabanı satamazsın.</p></div><button id="sellCar">Sat</button></div></section>
-  <section id="tab-tuning" class="hidden"><h2>Atölye & Modifiye</h2><p class="muted">Yükseltmeler sadece seçili arabaya uygulanır.</p><div id="upgrades"></div><h3 style="margin-top:14px">🛠️ Görsel Modifiye</h3><p class="muted">Parçalar seçili arabaya uygulanır ve kayıtlı kalır.</p><div id="parts"></div><h3 style="margin-top:14px">🎨 Renk Atölyesi</h3><p class="muted">Rengini seç; ödeme seçtiğin renge göre yapılır.</p><div class="color-grid">
+  <section id="tab-tuning" class="hidden"><h2>Atölye & Modifiye</h2><p class="muted">Yükseltmeler sadece seçili arabaya uygulanır.</p>
+<div class="bodykit-showroom"><div class="bodykit-heading"><div><b>🚘 MODİFİYE SHOWROOM'U</b><br><small>Aracını ortada incele · Parçaları satın almadan önce dene</small></div><span id="bodykitCount" class="bodykit-tag">Stok görünüm</span></div><div id="bodykitPreview" class="bodykit-stage"></div><div class="row" style="justify-content:center;position:relative;z-index:1"><span class="bodykit-tag" id="bodykitCarName">Seçili araç</span><span class="bodykit-tag" id="bodykitPaintName">Gövde rengi</span></div></div>
+<h3>🧩 Yeni gövde kitleri</h3><p class="muted">Widebody, tampon, spoiler, difüzör ve marşpiyel. Önizleme satın almadan önce görünür; satın alınca kalıcı takılır.</p><div id="bodykitParts"></div>
+<div id="upgrades"></div><h3 style="margin-top:14px">🛠️ Görsel Modifiye</h3><p class="muted">Parçalar seçili arabaya uygulanır ve kayıtlı kalır.</p><div id="parts"></div><h3 style="margin-top:14px">🎨 Renk Atölyesi</h3><p class="muted">Rengini seç; ödeme seçtiğin renge göre yapılır.</p><div class="color-grid">
 <button data-paint="#318cff" data-cost="500"><i style="background:#318cff"></i>Mavi · ₺500</button><button data-paint="#ffd43b" data-cost="500"><i style="background:#ffd43b"></i>Sarı · ₺500</button><button data-paint="#ff79c6" data-cost="500"><i style="background:#ff79c6"></i>Pembe · ₺500</button><button data-paint="#39c96b" data-cost="500"><i style="background:#39c96b"></i>Yeşil · ₺500</button>
 <button data-paint="#111318" data-cost="1000"><i style="background:#111318"></i>Siyah · ₺1.000</button><button data-paint="#e52e43" data-cost="1000"><i style="background:#e52e43"></i>Kırmızı · ₺1.000</button><button data-paint="#9b59ff" data-cost="1000"><i style="background:#9b59ff"></i>Mor · ₺1.000</button><button data-paint="#ff8a27" data-cost="1000"><i style="background:#ff8a27"></i>Turuncu · ₺1.000</button>
 <button data-paint="rainbow" data-cost="2500"><i class="rainbow"></i>Rengârenk · ₺2.500</button><button data-paint="redblack" data-cost="5000"><i class="split redblack"></i>Kırmızı-siyah · ₺5.000</button><button data-paint="purplepink" data-cost="5000"><i class="split purplepink"></i>Mor-pembe · ₺5.000</button><button data-paint="#d9b54a" data-cost="0" data-rankcolor="gold"><i style="background:#d9b54a"></i>Altın sarısı · C48 I</button><button data-paint="#8feaff" data-cost="0" data-rankcolor="diamond"><i style="background:#8feaff"></i>Elmas rengi · C48 I</button></div></section>
   <section id="tab-career" class="hidden"><h2>Kariyer Panosu</h2><div class="stats"><div class="stat"><small>YARIŞ</small><b id="races">0</b></div><div class="stat"><small>ZAFER</small><b id="wins">0</b></div><div class="stat"><small>SEVİYE</small><b id="level">1</b></div></div><h3>🏆 Lig Sıralaması — Her mod için ayrı rütbe</h3><p class="muted">Her modda kazandığın yarış rütbeni bir kademe yükseltir ve listedeki ödülü verir. Tüm modlarda C48 III olunca UZMAN açılır.</p><div id="rankBoard"></div><div class="item"><div><b>☀️ Sabah Yarışı</b><p>1.600 m · Tamamlama ₺3.500, hasarsız +₺1.000</p></div><span class="gold">Açık</span></div><div class="item"><div><b>🌙 Gece Otobanı</b><p>2.500 m · 3 rakip · 5 şerit · Açılış ₺30.000</p></div><span class="muted">₺30K</span></div><div class="item"><div><b>🏙️ Sokak Yarışı</b><p>2.800 m · 5 rakip · 2 şerit · Açılış ₺55.000</p></div><span class="muted">₺55K</span></div><div class="item"><div><b>🚨 Paket Atma</b><p>3.000 m · Polis takibi · ₺30.000 + hasarsız ₺6.000</p></div><span class="muted">60 sn bekleme</span></div></section>
 </aside>
 </main>
-<footer>C48 Studios © — Street Rush v1.0.5 · Koleksiyon Araması ve Klavye Kontrolü · Yayın sürümü: başlangıç bakiyesi ₺15.000 · İlerleme bu tarayıcıda kaydedilir.</footer>
+<footer>C48 Studios © — Street Rush v1.2 · Widebody ve Gövde Kiti Atölyesi · Yayın sürümü: başlangıç bakiyesi ₺15.000 · İlerleme bu tarayıcıda kaydedilir.</footer>
 <div id="toast" class="toast hidden"></div>
 <div id="dragModal" class="drag-modal hidden" role="dialog" aria-modal="true" aria-labelledby="dragModalTitle"><div class="drag-card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div class="muted" style="font-size:11px;letter-spacing:2px">C48 DRAG CHALLENGE</div><h2 id="dragModalTitle" style="margin:5px 0">🚦 600 METRELİK DRAG DÜELLOSU</h2></div><button id="dragClose" aria-label="Kapat">✕</button></div><div class="drag-strip"></div><div class="drag-pair"><div class="drag-car"><div class="muted">SENİN ARACIN</div><div id="dragPlayerEmoji" class="emoji">🚗</div><h3 id="dragPlayerName">Tofaş</h3><div class="drag-stats hidden"><span id="dragPlayerHp">90 HP</span><span>·</span><span id="dragPlayerTop">120 km/sa</span></div></div><div class="drag-car"><div class="muted">RAKİP ARACI</div><div id="dragOpponentEmoji" class="emoji">🏎️</div><h3 id="dragOpponentName">Rakip</h3><div class="drag-stats hidden"><span id="dragOpponentHp">200 HP</span><span>·</span><span id="dragOpponentTop">220 km/sa</span></div></div></div><div style="text-align:center"><b>🏁 600 m · Tek tur · 2 araç</b><div class="drag-light-row"><span class="drag-light red" id="preLightRed"></span><span class="drag-light yellow" id="preLightYellow"></span><span class="drag-light green" id="preLightGreen"></span></div><div class="muted" style="font-size:13px">Kazanırsan <b style="color:#36e58c">+₺9.000</b> · Kaybedersen <b style="color:#ff6878">−₺4.000</b> · Yarışlar arasında 30 saniye</div></div><div class="row" style="justify-content:center;margin-top:16px"><button class="primary" id="dragConfirm">🏁 Rakibi kabul et ve start al</button><button id="dragCancel">Geri dön</button></div></div></div>
 <script>
@@ -159,6 +177,7 @@ if(!state.unlockedModes)state.unlockedModes={morning:true,cargo:true,night:false
 if(!('weather' in state))state.weather='clear';if(!('dragLast' in state))state.dragLast=0;
 if(!state.rankProgress)state.rankProgress={};if(!state.rankRewards)state.rankRewards={};if(!state.rankColors)state.rankColors={gold:false,diamond:false};if(typeof state.expertClaimed!=='boolean')state.expertClaimed=false;
 let collectionFilter='all';
+let compareIndex=1;
 const RANK_MODES=['morning','night','street','cargo','drift','drag'];
 const RANK_LABELS=['Bronz','Bronz I','Bronz II','Bronz III','Platin I','Platin II','Platin III','Altın I','Altın II','Altın III','Elmas I','Elmas II','Elmas III','Fas I','Fas II','Fas III','C48 I','C48 II','C48 III','UZMAN'];
 const RANK_REWARDS=[0,3000,6000,12000,20000,25000,30000,35000,40000,45000,50000,55000,60000,70000,80000,90000,100000,110000,130000,150000];
@@ -170,8 +189,8 @@ function awardRankProgress(mode){let old=getRank(mode);if(old>=18)return null;le
 
 if(!state.unlockedModes.drift)state.unlockedModes.drift=true;if(!state.unlockedModes.drag)state.unlockedModes.drag=true;
 // v0.6.2 release: new players start with ₺15,000. Existing saved progress is preserved.
-try{if(!localStorage.getItem('c48streetrush'))localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.8')}catch(e){}
-function save(){try{localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.0.8')}catch(e){}renderAll()}
+try{if(!localStorage.getItem('c48streetrush'))localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.2.0')}catch(e){}
+function save(){try{localStorage.setItem('c48streetrush',JSON.stringify(state));localStorage.setItem('c48streetrush_v','1.2.0')}catch(e){}renderAll()}
 function notify(msg){$('toast').textContent=msg;$('toast').classList.remove('hidden');clearTimeout(notify.timer);notify.timer=setTimeout(()=>$('toast').classList.add('hidden'),2300)}
 function def(car=state.owned[state.selected]){return carDefs.find(x=>x.id===car.id)||carDefs[0]}
 function stats(car=state.owned[state.selected]){let d=def(car);return {hp:d.hp+car.engine*18+car.turbo*30,top:d.top+car.engine*7+car.turbo*12,handling:Math.min(1.5,d.handling+car.tires*.09+car.brakes*.025)}}
@@ -188,16 +207,50 @@ $('collectionCars').innerHTML=collectionCars.map(x=>{const owned=collectionOwned
 
 }
 $('collectionSearch').addEventListener('input',renderCollection);
-function renderAll(){if(!state.owned.length){state.owned.push({id:'tofas',engine:0,turbo:0,tires:0,brakes:0,color:'#f0f0f0'})} state.owned=state.owned.map(c=>c.id==='hatch'?{...c,id:'tofas',color:'#f0f0f0'}:c);state.selected=Math.max(0,Math.min(state.selected,state.owned.length-1));$('money').textContent=fmt(state.money);const c=state.owned[state.selected],d=def(c),s=stats(c);
+function renderComparison(){
+ const select=$('compareCar'),out=$('compareResults');if(!select||!out)return;
+ const current=state.owned[state.selected],currentDef=def(current),currentStats=stats(current);
+ const otherIndexes=state.owned.map((car,i)=>i).filter(i=>i!==state.selected);
+ if(!otherIndexes.length){select.innerHTML='<option value="">İkinci araç gerekli</option>';select.disabled=true;out.innerHTML='<p class="muted">Karşılaştırma yapmak için galeriden ikinci bir araç al.</p>';return;}
+ select.disabled=false;if(!otherIndexes.includes(compareIndex))compareIndex=otherIndexes[0];
+ select.innerHTML=otherIndexes.map(i=>{const car=state.owned[i],d=def(car);return `<option value="${i}" ${i===compareIndex?'selected':''}>${d.name}</option>`}).join('');
+ const other=state.owned[compareIndex],otherDef=def(other),otherStats=stats(other);
+ const rows=[['Güç',currentStats.hp,otherStats.hp,'HP'],['Son hız',currentStats.top,otherStats.top,'km/sa'],['Yol tutuşu',currentStats.handling.toFixed(2),otherStats.handling.toFixed(2),'']];
+ out.innerHTML=`<div class="garage-badges"><span class="garage-badge">${currentDef.emoji} ${currentDef.name}</span><span class="garage-badge">${otherDef.emoji} ${otherDef.name}</span></div>`+rows.map(([label,a,b,unit])=>{const av=Number(a),bv=Number(b),leftClass=av>bv?'better':'',rightClass=bv>av?'better':'';return `<div class="compare-row"><div class="left ${leftClass}"><b>${a}${unit?' '+unit:''}</b></div><div class="metric">${label}</div><div class="right ${rightClass}"><b>${b}${unit?' '+unit:''}</b></div></div>`}).join('')+`<div class="compare-note">Sol: seçili araç · Sağ: karşılaştırma aracı. Modifiye yükseltmeleri dahil edilmiştir.</div>`;
+}
+$('compareCar')?.addEventListener('change',e=>{compareIndex=Number(e.target.value);renderComparison()});
+let previewKit=null;
+function renderBodykitPreview(){
+ const c=state.owned[state.selected],d=def(c); if(!c||!d)return;
+ const active=id=>!!c[id], show=id=>active(id)||(previewKit===id);
+ const color=(c.color||d.color||'#d52b40');
+ const paint=color==='#f0f0f5'?'#e9edf2':color==='rainbow'?'url(#bodyRainbow)':color==='redblack'?'url(#bodyRedBlack)':color==='purplepink'?'url(#bodyPurplePink)':color;
+ const wide=show('widebody'), spoiler=active('spoiler')||show('gtSpoiler'), front=show('frontBumper'), skirts=show('sideSkirts'), diffuser=show('diffuser'), rims=active('sportRims');
+ const bodyPath='M150 25 Q128 25 122 48 L111 91 Q105 108 108 137 L119 181 Q124 197 143 199 L237 199 Q256 197 261 181 L272 137 Q275 108 269 91 L258 48 Q252 25 230 25 Z';
+ const fenders=wide?'<path d="M111 53 Q88 53 88 75 L88 105 Q88 123 109 124 L116 116 L116 66 Z M269 53 Q292 53 292 75 L292 105 Q292 123 271 124 L264 116 L264 66 Z M112 142 Q88 143 90 165 L99 184 Q105 193 123 187 L126 174 Z M268 142 Q292 143 290 165 L281 184 Q275 193 257 187 L254 174 Z" fill="#080e16" stroke="#9cb4cc" stroke-width="3"/>':'';
+ const spoilerSvg=spoiler?`<path d="M126 38 L254 38 L260 28 L120 28 Z" fill="#0a111a" stroke="#c4d3e4" stroke-width="2"/><path d="M139 37 L139 48 M241 37 L241 48" stroke="#a8bbd1" stroke-width="4"/>`:'';
+ const frontSvg=front?'<path d="M118 177 L262 177 L251 194 L129 194 Z" fill="#080d14" stroke="#d6e5f5" stroke-width="2"/><path d="M137 185 L243 185" stroke="#ff3b4e" stroke-width="3"/>':'';
+ const skirtSvg=skirts?'<path d="M111 105 L122 105 L126 164 L116 166 Z M258 105 L269 105 L264 166 L254 164 Z" fill="#101720" stroke="#b3c6dc" stroke-width="2"/>':'';
+ const diffSvg=diffuser?'<path d="M132 191 L248 191 L241 205 L139 205 Z" fill="#080d14" stroke="#92a9c0" stroke-width="2"/><path d="M158 195 L158 202 M178 195 L178 202 M198 195 L198 202 M218 195 L218 202" stroke="#61758b" stroke-width="2"/>':'';
+ const wheelX=wide?88:111, wheelW=wide?25:18;
+ $('bodykitPreview').innerHTML=`<svg class="bodykit-car" viewBox="0 0 380 230" role="img" aria-label="${d.name} modifiye önizlemesi"><defs><linearGradient id="bodyShine" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#ffffff" stop-opacity=".52"/><stop offset=".32" stop-color="#ffffff" stop-opacity=".04"/><stop offset="1" stop-color="#000000" stop-opacity=".38"/></linearGradient><linearGradient id="bodyRainbow"><stop stop-color="#f33"/><stop offset=".25" stop-color="#ffcf33"/><stop offset=".5" stop-color="#31d36b"/><stop offset=".75" stop-color="#328aff"/><stop offset="1" stop-color="#bd56ff"/></linearGradient><linearGradient id="bodyRedBlack"><stop stop-color="#e52e43"/><stop offset=".52" stop-color="#e52e43"/><stop offset=".53" stop-color="#111318"/><stop offset="1" stop-color="#111318"/></linearGradient><linearGradient id="bodyPurplePink"><stop stop-color="#9b59ff"/><stop offset=".52" stop-color="#9b59ff"/><stop offset=".53" stop-color="#ff79c6"/><stop offset="1" stop-color="#ff79c6"/></linearGradient></defs><ellipse cx="190" cy="206" rx="111" ry="13" fill="#0009"/><g transform="translate(0 4)">${fenders}<g fill="#080b10" stroke="#52657b" stroke-width="2"><rect x="${wheelX}" y="62" width="${wheelW}" height="39" rx="7"/><rect x="${380-wheelX-wheelW}" y="62" width="${wheelW}" height="39" rx="7"/><rect x="${wheelX}" y="143" width="${wheelW}" height="39" rx="7"/><rect x="${380-wheelX-wheelW}" y="143" width="${wheelW}" height="39" rx="7"/></g><path d="${bodyPath}" fill="${paint}" stroke="#dce7f4" stroke-opacity=".7" stroke-width="2"/><path d="${bodyPath}" fill="url(#bodyShine)"/><path d="M145 51 Q190 35 235 51 L248 87 L132 87 Z" fill="#8dd6f5" stroke="#15283a" stroke-width="4"/><path d="M132 96 L248 96 L244 139 L136 139 Z" fill="#172536" stroke="#526b84" stroke-width="2"/><path d="M139 143 L241 143 L229 171 L151 171 Z" fill="#111b29"/><path d="M145 55 L145 83 M235 55 L235 83" stroke="#ffffff" stroke-opacity=".3" stroke-width="3"/><path d="M123 42 L136 48 M257 42 L244 48" stroke="#fff4c8" stroke-width="7" stroke-linecap="round"/><path d="M127 180 L145 185 M253 180 L235 185" stroke="#ff3049" stroke-width="7" stroke-linecap="round"/>${spoilerSvg}${frontSvg}${skirtSvg}${diffSvg}${rims?'<g fill="#cbd7e5" stroke="#202b38" stroke-width="3"><circle cx="120" cy="81" r="7"/><circle cx="260" cy="81" r="7"/><circle cx="120" cy="160" r="7"/><circle cx="260" cy="160" r="7"/></g>':''}${active('neon')?'<path d="M103 70 L103 173 M277 70 L277 173" stroke="#29dfff" stroke-width="5" opacity=".8" filter="drop-shadow(0 0 6px #29dfff)"/>':''}</g></svg>`;
+ const installed=['widebody','frontBumper','sideSkirts','diffuser','gtSpoiler','spoiler','neon','sportRims','lowered'].filter(active).length;
+ $('bodykitCount').textContent=previewKit?'Önizleme modu':installed?`${installed} parça takılı`:'Stok görünüm';$('bodykitCarName').textContent=`${d.emoji} ${d.name}`;$('bodykitPaintName').textContent=`Renk: ${typeof c.color==='string'&&c.color.startsWith('#')?c.color.toUpperCase():c.color||'Standart'}`;
+}
+function renderAll(){if(!state.owned.length){state.owned.push({id:'tofas',engine:0,turbo:0,tires:0,brakes:0,color:'#f0f0f0'})} state.owned=state.owned.map(c=>({...c,...(c.id==='hatch'?{id:'tofas',color:'#f0f0f0'}:{})}));state.selected=Math.max(0,Math.min(state.selected,state.owned.length-1));$('money').textContent=fmt(state.money);const c=state.owned[state.selected],d=def(c),s=stats(c);
 $('activeCar').innerHTML=`<div class="garage-hero"><div class="garage-car-icon" style="color:${c.color||d.color}">${d.emoji}</div><div class="garage-car-title">${d.name}</div><p class="muted" style="margin:3px 0 0">${d.desc}</p><div class="garage-badges"><span class="garage-badge">⚡ ${s.hp} HP</span><span class="garage-badge">🏁 ${s.top} km/sa</span>${c.spoiler?'<span class="garage-badge installed">✓ Arka spoiler</span>':''}${c.neon?'<span class="garage-badge installed">✓ Yan neon</span>':''}${c.sportRims?'<span class="garage-badge installed">✓ Spor jant</span>':''}${c.lowered?'<span class="garage-badge installed">✓ Alçak süspansiyon</span>':''}</div><div class="progress"><span style="width:${Math.min(100,s.hp/3.2)}%"></span></div><small class="muted">Performans seviyesi ${Math.min(100,Math.round(s.hp/3.2))}%</small></div>`;
 $('power').textContent=s.hp;$('topSpeed').textContent=s.top;$('nitroStat').textContent=100+c.turbo*10;
 $('ownedCars').innerHTML=state.owned.map((x,i)=>{let z=carDefs.find(q=>q.id===x.id)||carDefs[0];return `<div class="carcard ${i===state.selected?'selected':''}"><div class="car-art" style="color:${x.color||z.color}">${z.emoji}</div><b>${z.name}</b><p class="muted">${z.hp+x.engine*18+x.turbo*30} HP</p><button style="width:100%;margin-top:7px" data-select="${i}" ${i===state.selected?'disabled':''}>${i===state.selected?'Seçili':'Arabayı seç'}</button></div>`}).join('');
+renderComparison();
 $('marketCars').innerHTML=carDefs.filter(x=>x.price>0&&(x.id!=='bugatti_chiron'||state.expertClaimed)&&!state.owned.some(o=>o.id===x.id)).map(x=>`<div class="item"><div><b>${x.emoji} ${x.name}</b><p>${x.hp} HP · ${x.top} km/sa<br>${x.desc}</p></div><button data-buy="${x.id}">₺${fmt(x.price)}</button></div>`).join('')||'<p class="muted">Galerideki bütün araçlar garajında! Harika koleksiyon.</p>';
 renderCollection();const isSupra=c.id==='supra';
 const upgrades=[['engine','Motor','Motor gücü +18 HP',1200,isSupra?5:3],['turbo','Turbo','+30 HP ve +12 km/sa',2200,isSupra?4:2],['tires','Lastikler','Daha iyi yol tutuşu',900,3],['brakes','Fren','Daha kontrollü frenleme',700,3]];
 $('upgrades').innerHTML=upgrades.map(([id,name,desc,cost,max])=>{let n=c[id]||0,price=cost*(n+1);return `<div class="item"><div><b>${name} <span class="muted">Lv.${n}/${max}</span></b><p>${desc}</p></div><button data-upgrade="${id}" ${n>=max?'disabled':''}>${n>=max?'MAX':'₺'+fmt(price)}</button></div>`}).join('');
 const parts=[['spoiler','🏁 Arka spoiler',4500,'Daha sportif görünüm'],['neon','💡 Yan neon ışıkları',3500,'Aracın iki yanından yere renkli ışık yayar'],['sportRims','🛞 Spor jant',2500,'Siyah spor jantlar'],['lowered','⬇️ Alçaltılmış süspansiyon',4000,'Daha alçak araç görünümü']];
+const bodyKits=[['widebody','🦾 Widebody dönüşümü',18000,'Geniş çamurluklar ve daha kaslı gövde'],['frontBumper','🛡️ Ön tampon + splitter',7500,'Ön tamponun altına sportif splitter'],['sideSkirts','↔️ Yan marşpiyeller',5000,'Aracın yan tarafında gövde uzantıları'],['diffuser','🏁 Arka difüzör',6000,'Daha agresif arka alt gövde'],['gtSpoiler','🏎️ GT yarış kanadı',12000,'Büyük arka kanat; standart spoiler ile birlikte kullanılabilir']];
 $('parts').innerHTML=parts.map(([id,name,cost,desc])=>`<div class="item"><div><b>${name}</b><p>${desc}</p></div><button data-part="${id}" ${c[id]?'disabled':''}>${c[id]?'TAKILI':'₺'+fmt(cost)}</button></div>`).join('');
+$('bodykitParts').innerHTML=bodyKits.map(([id,name,cost,desc])=>`<div class="item"><div><b>${name}</b><p>${desc}</p></div><div class="row"><button data-preview-kit="${id}">Önizle</button><button data-bodykit="${id}" ${c[id]?'disabled':''}>${c[id]?'TAKILI':'₺'+fmt(cost)}</button></div></div>`).join('');
+renderBodykitPreview();
 $('races').textContent=state.races;$('wins').textContent=state.wins;$('level').textContent=state.level;
 if($('nightStatus'))$('nightStatus').textContent=state.unlockedModes.night?'Açık':'₺30K';
 if($('cupStatus'))$('cupStatus').textContent=state.unlockedModes.street?'Açık':'₺55K';
@@ -219,13 +272,15 @@ if(b.dataset.mode){
 }
 if(b.dataset.tab){document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));['garage','collection','market','tuning','career'].forEach(t=>$('tab-'+t).classList.toggle('hidden',t!==b.dataset.tab))}
 if(b.dataset.collectionFilter){collectionFilter=b.dataset.collectionFilter;document.querySelectorAll('[data-collection-filter]').forEach(x=>x.classList.toggle('active',x===b));renderAll()}
-if(b.dataset.collectionSelect){const i=state.owned.findIndex(x=>x.id===b.dataset.collectionSelect);if(i>=0){state.selected=i;save();document.querySelector('[data-tab="garage"]').click();notify('Araç garajda gösteriliyor!')}}
+if(b.dataset.collectionSelect){const i=state.owned.findIndex(x=>x.id===b.dataset.collectionSelect);if(i>=0){state.selected=i;previewKit=null;save();document.querySelector('[data-tab="garage"]').click();notify('Araç garajda gösteriliyor!')}}
 if(b.dataset.collectionBuy){const id=b.dataset.collectionBuy;const d=carDefs.find(x=>x.id===id);if(d){document.querySelector('[data-tab="market"]').click();notify(d.name+' galeri listesinde. Satın almak için Galeri sekmesinden fiyatına bas.')}}
 
-if(b.dataset.select!==undefined){state.selected=+b.dataset.select;save()}
+if(b.dataset.select!==undefined){state.selected=+b.dataset.select;previewKit=null;save()}
 if(b.dataset.buy){let d=carDefs.find(x=>x.id===b.dataset.buy);if(state.money<d.price)return notify('Yeterli paran yok!');state.money-=d.price;state.owned.push({id:d.id,engine:0,turbo:0,tires:0,brakes:0,color:d.color,spoiler:false,neon:false,sportRims:false,lowered:false});state.selected=state.owned.length-1;save();notify(d.name+' garajına eklendi!')}
 if(b.dataset.upgrade){let c=state.owned[state.selected],id=b.dataset.upgrade,cost={engine:1200,turbo:2200,tires:900,brakes:700}[id]*(c[id]+1),max={engine:(c.id==='supra'?5:3),turbo:(c.id==='supra'?4:2),tires:3,brakes:3}[id];if(c[id]>=max)return;if(state.money<cost)return notify('Yükseltme için paran yetmiyor.');state.money-=cost;c[id]++;save();notify('Yükseltme tamamlandı!')}
 if(b.dataset.part){const costs={spoiler:4500,neon:3500,sportRims:2500,lowered:4000},c=state.owned[state.selected],id=b.dataset.part;if(c[id])return;if(state.money<costs[id])return notify('Bu parçayı almak için paran yetmiyor.');state.money-=costs[id];c[id]=true;save();notify('Modifiye parçası takıldı!')}
+if(b.dataset.previewKit){previewKit=b.dataset.previewKit;renderBodykitPreview();notify('Parça önizlemesi açık. Satın alırsan kalıcı takılır.')}
+if(b.dataset.bodykit){const costs={widebody:18000,frontBumper:7500,sideSkirts:5000,diffuser:6000,gtSpoiler:12000},c=state.owned[state.selected],id=b.dataset.bodykit;if(c[id])return notify('Bu parça zaten takılı.');if(state.money<costs[id])return notify('Bu parçayı almak için paran yetmiyor.');state.money-=costs[id];c[id]=true;previewKit=null;save();notify('Yeni gövde kiti takıldı!') }
 });
 $('sellCar').onclick=()=>{if(state.owned.length<=1)return notify('Son arabanı satamazsın!');let c=state.owned[state.selected],d=def(c),value=Math.round(d.price*.7+(c.engine*500+c.turbo*800+c.tires*300+c.brakes*200));state.money+=value;state.owned.splice(state.selected,1);state.selected=0;save();notify(d.name+' ₺'+fmt(value)+' karşılığında satıldı.')};
 const paints=['#e53d4f','#39a5ff','#ffc857','#f0f2f5','#52d273','#bd7bff','#ff7ac8'];
@@ -270,7 +325,7 @@ function startRace(dragOpponent=null){
  let c=state.owned[state.selected],s=stats(c);
  const finish={morning:1600,night:2500,street:2800,cargo:3000,drift:1800,drag:600}[mode];
  const opponents=mode==='night'?3:mode==='street'?5:mode==='drag'?1:0;
- race={mode,weather:currentWeather,driftScore:0,skid:0,countdown:mode==='drag'?3.6:3,running:true,ended:false,won:false,dist:0,speed:0,lane:1,playerX:W*.5,lateralVelocity:0,steerLean:0,traffic:[],spawn:0,roadOffset:0,nitro:100,hp:mode==='drag'?200:s.hp,top:mode==='drag'?180:s.top,handling:mode==='drag'?1.15:s.handling,hit:0,health:100,invuln:0,lastDamage:0,damageTimer:0,elapsed:0,finish,reward:0,clean:true,opponents:Array.from({length:opponents},(_,i)=>({lane:i%Math.min(mode==='night'?5:2,5),lanePos:i%Math.min(mode==='night'?5:2,5),steerLean:0,y:H*.72-60-i*65,color:['#f0f0f0','#e53d4f','#39a5ff','#ffc857','#52d273'][i%5],progress:Math.random()*30+5,dist:Math.random()*180,speed:mode==='night'?145+Math.random()*35:160+Math.random()*55,rank:i+1,changeIn:2+Math.random()*4})),caught:false,policeGap:mode==='cargo'?360:650,policeHeat:1,policeFlash:0,roadblockTimer:8,roadblock:null,escapeTime:0,dragOpponent:dragOpponent||null,dragOpponentDist:0,dragOpponentSpeed:dragOpponent?(180*(currentWeather==='rain'?.94:1))/3.6:0,dragLight:'red',dragLightTimer:0.8,dragStarted:false,dragFlash:0};
+ race={mode,weather:currentWeather,driftScore:0,skid:0,countdown:mode==='drag'?3.6:3,running:true,ended:false,won:false,dist:0,speed:0,lane:1,playerX:W*.5,lateralVelocity:0,steerLean:0,traffic:[],spawn:0,roadOffset:0,nitro:100,hp:mode==='drag'?200:s.hp,top:mode==='drag'?180:s.top,handling:mode==='drag'?1.15:s.handling,hit:0,health:100,invuln:0,lastDamage:0,damageTimer:0,elapsed:0,finish,reward:0,clean:true,opponents:Array.from({length:opponents},(_,i)=>({lane:i%Math.min(mode==='night'?5:2,5),lanePos:i%Math.min(mode==='night'?5:2,5),steerLean:0,y:H*.72-60-i*65,color:['#f0f0f0','#e53d4f','#39a5ff','#ffc857','#52d273'][i%5],progress:Math.random()*30+5,dist:Math.random()*180,speed:mode==='night'?145+Math.random()*35:160+Math.random()*55,rank:i+1,changeIn:1.5+Math.random()*3,style:['steady','aggressive','cautious'][i%3],baseSpeed:mode==='night'?145+Math.random()*35:160+Math.random()*55,steerInput:0,decisionTimer:.3+Math.random()*.8})),caught:false,policeGap:mode==='cargo'?360:650,policeHeat:1,policeFlash:0,roadblockTimer:8,roadblock:null,escapeTime:0,dragOpponent:dragOpponent||null,dragOpponentDist:0,dragOpponentSpeed:dragOpponent?(180*(currentWeather==='rain'?.94:1))/3.6:0,dragLight:'red',dragLightTimer:0.8,dragStarted:false,dragFlash:0};
  $('chasePanel').classList.toggle('active',mode==='cargo');$('chaseMeter').style.width='55%';$('chaseStatus').textContent='MESAFE 360 m';$('startRace').classList.add('hidden');$('restartRace').classList.add('hidden');$('claim').classList.add('hidden');$('raceState').textContent='3';$('health').textContent='100';$('nitroHud').textContent='100';$('nitroBar').style.width='100%';
  save();notify(mode==='cargo'?'Paket Atma başladı! Polis peşinde!':mode==='drift'?'Drift başladı! Virajlarda yön değiştirerek puan topla.':mode==='drag'?'Drag düellosu! Kırmızı-sarı-yeşil ışıkları bekle!':'Hazır ol! Geri sayım başlıyor.');
 }
@@ -282,13 +337,13 @@ window.addEventListener('keyup',e=>{const k=keyName(e);if(k)keys[k]=false});
 window.addEventListener('blur',()=>{Object.keys(keys).forEach(k=>keys[k]=false)});
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();keys[k]=true},up=e=>{e.preventDefault();keys[k]=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
 function roadX(y){return W*.5}
-function drawCar(x,y,color,player=false,mods={},model='generic'){
+function drawCar(x,y,color,player=false,mods={},model='generic',steerAngle=0){
  ctx.save();ctx.translate(x,y);
  const sport=model==='supra'||model==='czinger', sedan=model==='passat';
  const half=sport?24:sedan?22:22, front=sport?-40:sedan?-37:-34, rear=sport?38:sedan?39:36;
  // soft road shadow and separate wheels
  ctx.fillStyle='#0009';ctx.beginPath();ctx.ellipse(2,13,half+5,39,0,0,Math.PI*2);ctx.fill();
- ctx.fillStyle='#090d12';for(const wx of [-half,half])for(const wy of [-22,22]){ctx.beginPath();ctx.roundRect(wx-4,wy-8,8,16,2);ctx.fill();}
+ ctx.fillStyle='#090d12';for(const wx of [-half,half])for(const wy of [-22,22]){ctx.save();ctx.translate(wx,wy);if(wy<0)ctx.rotate(Math.max(-.42,Math.min(.42,steerAngle*.34)));ctx.beginPath();ctx.roundRect(-4,-8,8,16,2);ctx.fill();ctx.restore();}
  let paint=color;
  if(color==='rainbow'){paint=ctx.createLinearGradient(-22,-38,22,38);[['#ff3434',0],['#ffb52e',.2],['#ffe83a',.4],['#3bd36b',.6],['#398cff',.8],['#b05cff',1]].forEach(([c,t])=>paint.addColorStop(t,c));}
  else if(color==='redblack'||color==='purplepink'){paint=ctx.createLinearGradient(-22,-38,22,38);paint.addColorStop(.5,color==='redblack'?'#e52e43':'#9b59ff');paint.addColorStop(1,color==='redblack'?'#111318':'#ff79c6');}
@@ -326,6 +381,11 @@ function drawCar(x,y,color,player=false,mods={},model='generic'){
  if(player&&mods.lowered){ctx.fillStyle='#05070a';ctx.fillRect(-17,24,34,7)}
  if(player&&mods.sportRims){ctx.fillStyle='#c5d0df';for(const wx of [-half,half])for(const wy of [-18,22]){ctx.beginPath();ctx.arc(wx,wy,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#202b38';ctx.beginPath();ctx.arc(wx,wy,2,0,Math.PI*2);ctx.fill();ctx.fillStyle='#c5d0df'}}
  if(player&&mods.spoiler){ctx.fillStyle='#090d12';ctx.fillRect(-21,rear-8,42,4);ctx.fillStyle='#303946';ctx.fillRect(-17,rear-12,4,7);ctx.fillRect(13,rear-12,4,7);ctx.fillStyle='#111820';ctx.fillRect(-23,rear-5,46,3)}
+ if(player&&mods.widebody){ctx.fillStyle=paint;ctx.strokeStyle='#111923';ctx.lineWidth=2;for(const side of [-1,1]){ctx.beginPath();ctx.roundRect(side<0?-half-5:half-1,-25,6,51,3);ctx.fill();ctx.stroke();}}
+ if(player&&mods.frontBumper){ctx.fillStyle='#090d12';ctx.fillRect(-half+2,front+1,half*2-4,5);ctx.fillStyle='#d7e2ee';ctx.fillRect(-half+7,front+3,half*2-14,2)}
+ if(player&&mods.sideSkirts){ctx.fillStyle='#101720';ctx.fillRect(-half-1,-4,3,29);ctx.fillRect(half-2,-4,3,29)}
+ if(player&&mods.diffuser){ctx.fillStyle='#080d14';ctx.fillRect(-half+5,rear-2,half*2-10,5);ctx.fillStyle='#74869a';for(let dx=-12;dx<=12;dx+=8)ctx.fillRect(dx,rear-1,2,4)}
+ if(player&&mods.gtSpoiler){ctx.fillStyle='#080d14';ctx.fillRect(-half-5,rear-13,half*2+10,4);ctx.fillStyle='#526276';ctx.fillRect(-half+1,rear-15,4,7);ctx.fillRect(half-5,rear-15,4,7)}
  if(player&&mods.neon){ctx.save();ctx.globalAlpha=.85;ctx.fillStyle='#21d9ff';ctx.shadowColor='#21d9ff';ctx.shadowBlur=18;ctx.fillRect(-half-3,-13,3,35);ctx.fillRect(half,-13,3,35);ctx.globalAlpha=.35;ctx.fillRect(-half-7,-8,4,27);ctx.fillRect(half+3,-8,4,27);ctx.shadowBlur=0;ctx.restore()}
  ctx.restore();
 }
@@ -481,7 +541,7 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
    return;
  }
  race.traffic.forEach(t=>drawCar(roadX(t.y)+t.lane*70,t.y,t.color));
- if(race.mode!=='drag'&&race.opponents)race.opponents.forEach(o=>{const gap=o.dist-race.dist;o.y=Math.max(-90,Math.min(H+90,H*.76-gap*0.42));const lanes=race.mode==='night'||race.mode==='cargo'?5:2,half=race.mode==='night'||race.mode==='cargo'?280:160;const lanePos=Number.isFinite(o.lanePos)?o.lanePos:o.lane;let x=W*.5-half+((lanePos+.5)*(half*2/lanes));ctx.save();ctx.translate(x,o.y);ctx.rotate((o.steerLean||0)*.055);drawCar(0,0,o.color);ctx.restore();});
+ if(race.mode!=='drag'&&race.opponents)race.opponents.forEach(o=>{const gap=o.dist-race.dist;o.y=Math.max(-90,Math.min(H+90,H*.76-gap*0.42));const lanes=race.mode==='night'||race.mode==='cargo'?5:2,half=race.mode==='night'||race.mode==='cargo'?280:160;const lanePos=Number.isFinite(o.lanePos)?o.lanePos:o.lane;let x=W*.5-half+((lanePos+.5)*(half*2/lanes));ctx.save();ctx.translate(x,o.y);ctx.rotate((o.steerLean||0)*.055);drawCar(0,0,o.color,false,{},'generic',o.steerInput||o.steerLean||0);ctx.restore();});
  if(race.mode==='cargo'&&!race.caught){
    const gap=race.policeGap??360, py=H*.76+Math.min(115,Math.max(22,gap*.24));
    // Red/blue flashing glow and two patrol cars pursuing from behind.
@@ -492,7 +552,7 @@ function drawScene(dt){ctx.clearRect(0,0,W,H);let sky=ctx.createLinearGradient(0
    ctx.textAlign='center';ctx.font='900 12px system-ui';ctx.fillStyle='#fff';ctx.fillText('POLİS',race.playerX,py+53);ctx.restore();
    if(race.roadblock){ctx.save();const by=H*.35;ctx.fillStyle='#f5bd43';ctx.fillRect(W*.5-110,by,220,13);ctx.fillStyle='#1a2029';for(let q=0;q<8;q++){ctx.beginPath();ctx.moveTo(W*.5-105+q*28,by);ctx.lineTo(W*.5-95+q*28,by);ctx.lineTo(W*.5-108+q*28,by+13);ctx.lineTo(W*.5-118+q*28,by+13);ctx.fill()}ctx.fillStyle='#ff4057';ctx.font='900 15px system-ui';ctx.fillText('POLİS BARİKATI',W*.5,by-9);ctx.restore();}
  }
- let c=state.owned[state.selected],d=def(c);ctx.save();ctx.translate(race.playerX,H*.76);ctx.rotate((race.steerLean||0)*.055);drawCar(0,0,c.color||d.color,true,c,d.id);ctx.restore();if(race.damageTimer>0){ctx.save();ctx.textAlign='center';ctx.fillStyle='#ff596b';ctx.font='900 28px system-ui';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText('-'+race.lastDamage+' CAN',race.playerX,H*.76-55);ctx.restore()}
+ let c=state.owned[state.selected],d=def(c);ctx.save();ctx.translate(race.playerX,H*.76);ctx.rotate((race.steerLean||0)*.055);drawCar(0,0,c.color||d.color,true,c,d.id,race.steerInput||0);ctx.restore();if(race.damageTimer>0){ctx.save();ctx.textAlign='center';ctx.fillStyle='#ff596b';ctx.font='900 28px system-ui';ctx.shadowColor='#000';ctx.shadowBlur=8;ctx.fillText('-'+race.lastDamage+' CAN',race.playerX,H*.76-55);ctx.restore()}
  if(keys.nitro&&race.nitro>0&&race.speed>2){const boostPulse=.82+Math.sin(anim*32)*.12;ctx.save();ctx.shadowColor='#39dfff';ctx.shadowBlur=16;ctx.fillStyle='#3bd7ff';ctx.globalAlpha=boostPulse;ctx.beginPath();ctx.moveTo(race.playerX-9,H*.76+34);ctx.lineTo(race.playerX,H*.76+68+Math.sin(anim*27)*5);ctx.lineTo(race.playerX+9,H*.76+34);ctx.closePath();ctx.fill();ctx.fillStyle='#fff4b0';ctx.beginPath();ctx.moveTo(race.playerX-4,H*.76+35);ctx.lineTo(race.playerX,H*.76+53+Math.sin(anim*35)*3);ctx.lineTo(race.playerX+4,H*.76+35);ctx.closePath();ctx.fill();ctx.restore();}
  if(race.countdown>0){ctx.fillStyle='#050a11aa';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle='#ffffff';ctx.font='900 86px system-ui';ctx.fillText(Math.ceil(race.countdown),W/2,H/2);ctx.font='18px system-ui';ctx.fillText('HAZIR OL!',W/2,H/2+42)}
  if(race.ended){ctx.fillStyle='#050a11bb';ctx.fillRect(0,0,W,H);ctx.textAlign='center';ctx.fillStyle=race.won?'#ffc857':'#ff6575';ctx.font='900 48px system-ui';ctx.fillText(race.caught?'YAKALANDIN':race.won?'YARIŞ TAMAMLANDI':race.mode==='cargo'?'YAKALANDIN':'YARIŞ BİTTİ',W/2,H/2-12);ctx.fillStyle='#fff';ctx.font='22px system-ui';ctx.fillText(race.caught?'Polis seni yakaladı · Ceza: ₺3.000':race.won?'Ödül: ₺'+fmt(race.reward)+(race.mode==='cargo'?(race.clean?' (hasarsız +₺6.000)':''):race.mode==='morning'&&race.clean?' (hasarsız +₺1.000)':'')+(race.rank?' · Sıra: '+race.rank+'.':''):'Daha hızlı ol! Tekrar deneyebilirsin.',W/2,H/2+30)}
@@ -516,7 +576,7 @@ function update(dt){if(!race||!race.running)return;dt=Math.min(dt,.035);race.ela
  if(nitro){race.speed+=5.2*dt;race.nitro=Math.max(0,race.nitro-23*dt)}else race.nitro=Math.min(100,race.nitro+7*dt);
  race.speed=Math.max(0,Math.min(max,race.speed));
  // Steering has inertia and grip limits. Wet roads feel looser; opposite input settles the car gradually.
- const steerInput=(keys.right?1:0)-(keys.left?1:0);
+ const steerInput=(keys.right?1:0)-(keys.left?1:0);race.steerInput=steerInput;
  const speedFactor=.42+Math.min(1,race.speed/Math.max(.1,baseTop))*.72;
  const steerForce=steerInput*245*(race.handling||1)*grip*speedFactor;
  race.lateralVelocity=(race.lateralVelocity||0)+steerForce*dt;
@@ -529,7 +589,26 @@ function update(dt){if(!race||!race.running)return;dt=Math.min(dt,.035);race.ela
  race.playerX=Math.max(center-edge,Math.min(center+edge,race.playerX));race.dist+=race.speed*dt;race.roadOffset+=race.speed*dt*2.5;if(race.mode==='drag'&&race.dragOpponent){race.dragOpponentDist+=race.dragOpponentSpeed*dt;if(race.dragOpponentDist>=600&&race.dist<600){finishDrag(false);return}}
  if(race.mode!=='drag'){race.spawn-=dt;if(race.spawn<=0){const fast=race.speed*3.6;const baseMin=(race.mode==='night'||race.mode==='cargo')?0.72:0.38;/* Zorluk artışı yalnızca 200 km/sa üstünde */const over200=Math.max(0,fast-200);const spawnInterval=fast<=200?1.65:Math.max(baseMin,1.65-over200/95);race.spawn=spawnInterval;race.traffic.push({y:-75,lane:Math.floor(Math.random()*(race.mode==='night'||race.mode==='cargo'?5:race.mode==='street'?2:3))-(race.mode==='night'||race.mode==='cargo'?2:race.mode==='street'?0:1),color:['#e4a84a','#47a4d8','#b56fe3','#e8e9ed'][Math.floor(Math.random()*4)],v:Math.max(65,fast*.55+Math.random()*75),wobble:Math.random()<.22?1:0})}}
  if(race.mode!=='drag')race.traffic.forEach(t=>{const kmh=race.speed*3.6;const relative=Math.max(95,kmh*1.65+45-t.v*.48);t.y+=relative*dt*(1+kmh/260);if(t.wobble&&t.y>40&&t.y<H*.55&&Math.random()<dt*.35)t.lane+=Math.random()<.5?-0.015:0.015;});
-for(const o of (race.opponents||[])){o.dist+=o.speed/3.6*dt;const maxLane=(race.mode==='night'||race.mode==='cargo')?4:1;if(!Number.isFinite(o.lanePos))o.lanePos=o.lane;if(!Number.isFinite(o.targetLane))o.targetLane=o.lane;o.changeIn-=dt;if(o.changeIn<=0){const previous=o.targetLane;o.targetLane=Math.max(0,Math.min(maxLane,o.targetLane+(Math.random()<.5?-1:1)));if(o.targetLane!==previous)o.steerLean=Math.sign(o.targetLane-previous);o.changeIn=2.5+Math.random()*4;if(Math.random()<.35)o.speed+=3+Math.random()*8;}const laneDelta=o.targetLane-o.lanePos;o.lanePos+=laneDelta*Math.min(1,dt*1.65);if(Math.abs(laneDelta)<.025)o.lanePos=o.targetLane;o.steerLean=(o.steerLean||0)*Math.max(0,1-dt*1.8);o.lane=o.targetLane;}if(race.mode==='cargo'&&!race.caught){
+for(const o of (race.opponents||[])){
+ o.dist+=o.speed/3.6*dt;const wide=race.mode==='night'||race.mode==='cargo',maxLane=wide?4:1;
+ if(!Number.isFinite(o.lanePos))o.lanePos=o.lane;if(!Number.isFinite(o.targetLane))o.targetLane=o.lane;
+ o.decisionTimer=(o.decisionTimer??.5)-dt;
+ const sameLaneAhead=(race.opponents||[]).filter(p=>p!==o&&Math.abs((p.lanePos??p.lane)-o.lanePos)<.62&&p.dist>o.dist&&p.dist-o.dist<95).sort((a,b)=>a.dist-b.dist)[0];
+ const playerAhead=Math.abs((race.playerX-W*.5)/(wide?112:160)-o.lanePos)<.55&&race.dist>o.dist&&race.dist-o.dist<85;
+ if(o.decisionTimer<=0){
+   const oldTarget=o.targetLane;let desired=o.targetLane;
+   if(sameLaneAhead||playerAhead){const candidates=[o.lanePos-1,o.lanePos+1].map(v=>Math.max(0,Math.min(maxLane,Math.round(v)))).filter((v,i,a)=>a.indexOf(v)===i&&v!==o.targetLane);
+     const safe=candidates.find(l=>!(race.opponents||[]).some(p=>p!==o&&Math.abs((p.lanePos??p.lane)-l)<.55&&Math.abs(p.dist-o.dist)<105));
+     if(safe!==undefined)desired=safe;else o.speed=Math.max(o.baseSpeed*.62,o.speed-18*dt);
+   }else if(o.style==='aggressive'&&Math.random()<.38){const faster=(race.opponents||[]).find(p=>p!==o&&p.dist>o.dist&&p.dist-o.dist<130&&p.speed<o.speed);if(faster){const options=[Math.round(o.lanePos)-1,Math.round(o.lanePos)+1].map(v=>Math.max(0,Math.min(maxLane,v)));const safe=options.find(l=>!(race.opponents||[]).some(p=>p!==o&&Math.abs((p.lanePos??p.lane)-l)<.5&&Math.abs(p.dist-o.dist)<90));if(safe!==undefined)desired=safe;}}
+   else if(Math.random()<(o.style==='cautious'?.16:.28)){const options=[Math.round(o.lanePos)-1,Math.round(o.lanePos)+1].map(v=>Math.max(0,Math.min(maxLane,v))).filter((v,i,a)=>a.indexOf(v)===i&&v!==o.targetLane);const safe=options.find(l=>!(race.opponents||[]).some(p=>p!==o&&Math.abs((p.lanePos??p.lane)-l)<.55&&Math.abs(p.dist-o.dist)<95));if(safe!==undefined)desired=safe;}
+   if(desired!==oldTarget){o.targetLane=desired;o.steerInput=Math.sign(desired-o.lanePos);o.steerLean=o.steerInput;}
+   o.decisionTimer=(o.style==='cautious'?1.4:0.8)+Math.random()*(o.style==='aggressive'?1.2:2.1);
+ }
+ const laneDelta=o.targetLane-o.lanePos;o.lanePos+=laneDelta*Math.min(1,dt*(o.style==='aggressive'?2.25:1.65));if(Math.abs(laneDelta)<.025){o.lanePos=o.targetLane;o.steerInput=0;}
+ if(!sameLaneAhead&&!playerAhead){const desiredSpeed=o.baseSpeed*(o.style==='aggressive'?1.08:o.style==='cautious'?.92:1);o.speed+=(desiredSpeed-o.speed)*Math.min(1,dt*.7);}
+ o.steerLean=(o.steerLean||0)*Math.max(0,1-dt*1.8);o.lane=o.targetLane;
+ }if(race.mode==='cargo'&&!race.caught){
    const kmh=race.speed*3.6;race.policeHeat=Math.min(5,1+Math.floor(race.dist/650));
    // Faster driving opens the gap; slowing down, impacts and roadblocks let police close in.
    race.policeGap+=(race.speed-155/3.6)*dt*(2.2+race.policeHeat*.28);
